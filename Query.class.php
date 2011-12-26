@@ -132,9 +132,9 @@
          * Type of query that should be run (select, update, ...)
          * 
          * @var    string
-         * @access private
+         * @access protected
          */
-        private $_type;
+        protected $_type;
 
         /**
          * _columns
@@ -142,9 +142,9 @@
          * Columns/fields that should be selected from the database
          * 
          * @var    array
-         * @access private
+         * @access protected
          */
-        private $_columns;
+        protected $_columns;
 
         /**
          * _inputs
@@ -153,9 +153,9 @@
          * update)
          * 
          * @var    array
-         * @access private
+         * @access protected
          */
-        private $_inputs;
+        protected $_inputs;
 
         /**
          * _tables
@@ -164,9 +164,9 @@
          * in the call
          * 
          * @var    array
-         * @access private
+         * @access protected
          */
-        private $_tables;
+        protected $_tables;
 
         /**
          * _conditions
@@ -174,9 +174,9 @@
          * Conditions for a query to execute (select, update)
          * 
          * @var    array
-         * @access private
+         * @access protected
          */
-        private $_conditions;
+        protected $_conditions;
 
         /**
          * _groupings
@@ -184,9 +184,9 @@
          * Columns/fields whereby a result set should be grouped into/by
          * 
          * @var    array
-         * @access private
+         * @access protected
          */
-        private $_groupings;
+        protected $_groupings;
 
         /**
          * _filters
@@ -195,9 +195,9 @@
          * returned by the database
          * 
          * @var    array
-         * @access private
+         * @access protected
          */
-        private $_filters;
+        protected $_filters;
 
         /**
          * _orders
@@ -206,9 +206,9 @@
          * (select, update)
          * 
          * @var array
-         * @access private
+         * @access protected
          */
-        private $_orders;
+        protected $_orders;
 
         /**
          * _rows
@@ -217,9 +217,9 @@
          * update)
          * 
          * @var    int
-         * @access private
+         * @access protected
          */
-        private $_rows;
+        protected $_rows;
 
         /**
          * _offset
@@ -227,9 +227,9 @@
          * Where a select query should begin it's search
          * 
          * @var    int
-         * @access private
+         * @access protected
          */
-        private $_offset;
+        protected $_offset;
 
         /**
          * __construct
@@ -265,12 +265,12 @@
          * Sets passed in conditions to a specific format, and returns
          * (recursively) the results. Used by having and where methods
          * 
-         * @access private
+         * @access protected
          * @return array conditions as formatted to the proper internal
          *         pattern, for assignment to either $this->where or
          *         $this->_filters properties
          */
-        private function _conditions()
+        protected function _conditions()
         {
             $conditions = array();
             $args = func_get_args();
@@ -371,10 +371,10 @@
          * 
          * @notes  third optional parameter in a call is whether or not to
          *         auto-add apostrophes
-         * @access private
+         * @access protected
          * @return void
          */
-        private function _inputs()
+        protected function _inputs()
         {
             $args = func_get_args();
             foreach ($args as $arg) {
@@ -402,17 +402,6 @@
                     break;
                 }
             }
-        }
-
-        /**
-         * _ip  
-         * 
-         * @access private
-         * @return string
-         */
-        private function _ip()
-        {
-            return _SERVER::read('REMOTE_ADDR');
         }
 
         /**
@@ -540,18 +529,7 @@
         {
             $this->_type = 'insert';
             $args = func_get_args();
-            if (empty($args)) {
-                $this->insert(
-                    array('timestamp_created', 'NOW()'),
-                    array('timestamp_updated', 'NOW()'),
-                    array('status', 'open'),
-                    array('type', 'default'),
-                    array('ip', $this->_ip())
-                );
-            } else {
-                $args = func_get_args();
-                call_user_func_array(array($this, '_inputs'), $args);
-            }
+            call_user_func_array(array($this, '_inputs'), $args);
         }
 
         /**
@@ -560,10 +538,6 @@
          * Records the tables that should be used for the statement, with their
          * alias/key specified
          * 
-         * @notes  shouldn't be called for a model's default table; this will
-         *         automatically be added in self::parse; if another table is
-         *         needed, though, then the model's default table needs to also
-         *         be specified
          * @access public
          * @return void
          */
@@ -624,7 +598,10 @@
         public function where()
         {
             $args = func_get_args();
-            $this->_conditions[][] = call_user_func_array(array($this, '_conditions'), $args);
+            $this->_conditions[][] = call_user_func_array(
+                array($this, '_conditions'),
+                $args
+            );
         }
 
         /**
@@ -653,7 +630,9 @@
         public function orWhere()
         {
             if (empty($this->_conditions)) {
-                throw new Exception('Query::orWhere call requires Query::where call first.');
+                throw new Exception(
+                    'Query::orWhere call requires Query::where call first.'
+                );
             }
             $args = func_get_args();
             call_user_func_array(array($this, 'where'), $args);
@@ -848,7 +827,10 @@
         {
             // command
             if ($this->_type === null) {
-                throw new Exception('Query::$type must be specified by calling Query::select, Query::update, or Query::insert.');
+                throw new Exception(
+                    'Query::$type must be specified by calling Query::select,' .
+                    'Query::update, or Query::insert.'
+                );
             }
             $command = mb_strtoupper($this->_type);
             if ($this->_type === 'insert') {
@@ -879,7 +861,10 @@
                     if (is_object($details[0])) {
                         $exp .= '(' . ($details[0]->parse()) . ')';
                     } elseif ($details[1] === true) {
-                        if (is_int($details[0]) || in_array($details[0], array('NOW()'))) {
+                        if (
+                            is_int($details[0])
+                            || in_array($details[0], array('NOW()'))
+                        ) {
                             $exp .= $details[0];
                         } else {
                             $exp .= '\'' . ($details[0]) . '\'';
@@ -898,7 +883,10 @@
                     if (is_object($details[0])) {
                         $value = '(' . ($details[0]->parse()) . ')';
                     } elseif ($details[1] === true) {
-                        if (is_int($details[0]) || in_array($details[0], array('NOW()'))) {
+                        if (
+                            is_int($details[0])
+                            || in_array($details[0], array('NOW()'))
+                        ) {
                             $value = $details[0];
                         } else {
                             $value = '\'' . ($details[0]) . '\'';
