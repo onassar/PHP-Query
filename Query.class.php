@@ -14,16 +14,6 @@
     class Query
     {
         /**
-         * _type
-         * 
-         * Type of query that should be run (select, update, ...)
-         * 
-         * @var    string
-         * @access protected
-         */
-        protected $_type;
-
-        /**
          * _columns
          * 
          * Columns/fields that should be selected from the database
@@ -32,28 +22,6 @@
          * @access protected
          */
         protected $_columns = array();
-
-        /**
-         * _inputs
-         * 
-         * Input (columns:values) that should be used in CU operationsw (insert,
-         * update)
-         * 
-         * @var    array (default: array())
-         * @access protected
-         */
-        protected $_inputs = array();
-
-        /**
-         * _tables
-         * 
-         * List of tables, and optionally their aliases for the query, for usage
-         * in the call
-         * 
-         * @var    array (default: array())
-         * @access protected
-         */
-        protected $_tables = array();
 
         /**
          * _conditions
@@ -66,6 +34,17 @@
         protected $_conditions = array();
 
         /**
+         * _filters
+         * 
+         * Filters that should be applied to a result set after it has been
+         * returned by the database
+         * 
+         * @var    array (default: array())
+         * @access protected
+         */
+        protected $_filters = array();
+
+        /**
          * _groupings
          * 
          * Columns/fields whereby a result set should be grouped into/by
@@ -76,15 +55,25 @@
         protected $_groupings = array();
 
         /**
-         * _filters
+         * _inputs
          * 
-         * Filters that should be applied to a result set after it has been
-         * returned by the database
+         * Input (columns:values) that should be used in create/update
+         * operations (<insert> and <update> methods)
          * 
          * @var    array (default: array())
          * @access protected
          */
-        protected $_filters = array();
+        protected $_inputs = array();
+
+        /**
+         * _offset
+         * 
+         * Where a select query should begin it's search
+         * 
+         * @var    int (default: 0)
+         * @access protected
+         */
+        protected $_offset = 0;
 
         /**
          * _orders
@@ -109,14 +98,25 @@
         protected $_rows = 10;
 
         /**
-         * _offset
+         * _tables
          * 
-         * Where a select query should begin it's search
+         * List of tables, and optionally their aliases for the query, for usage
+         * in the call
          * 
-         * @var    int (default: 0)
+         * @var    array (default: array())
          * @access protected
          */
-        protected $_offset = 0;
+        protected $_tables = array();
+
+        /**
+         * _type
+         * 
+         * Type of query that should be run (select, update, ...)
+         * 
+         * @var    string
+         * @access protected
+         */
+        protected $_type;
 
         /**
          * __construct
@@ -274,6 +274,20 @@
         }
 
         /**
+         * andWhere
+         * 
+         * An alias of Query::where
+         * 
+         * @access public
+         * @return void
+         */
+        public function andWhere()
+        {
+            $args = func_get_args();
+            call_user_func_array(array($this, 'where'), $args);
+        }
+
+        /**
          * average
          * 
          * An alias of Query::select(array('average' => 'AVG(column)')). Sets
@@ -311,122 +325,17 @@
         }
 
         /**
-         * sum
+         * filter
          * 
-         * An alias of Query::select(array('sum' => 'SUM(column)')). Sets the
-         * sum of a column for the query to be selected
-         * 
-         * @access public
-         * @param  string $column column that should have it's sum calculated
-         * @param  string $name. (default: 'sum') the name/alias/key for the sum
-         * @return void
-         */
-        public function sum($column, $name = 'sum')
-        {
-            $this->select(array($name => 'SUM(' . ($column) . ')'));
-        }
-
-        /**
-         * select
-         * 
-         * Sets the columns to return in a select statement
+         * An alias of Query::having
          * 
          * @access public
          * @return void
          */
-        public function select()
-        {
-            $this->_type = 'select';
-            $args = func_get_args();
-            if (empty($args)) {
-                $this->select('*');
-            } else {
-
-                // loop through arguments, formatting the primary key selection or adding the columns
-                foreach ($args as $arg) {
-
-                    // can't be if/elseif, need's to be consecutive
-                    if (!is_array($arg)) {
-                        $this->_columns[] = $arg;
-                    }
-                    if (is_array($arg)) {
-                        foreach ($arg as $key => $value) {
-                            if (is_int($key)) {
-                                $this->select($value);
-                            } else {
-                                $this->_columns[$key] = $value;
-                            }
-                        }
-                    }
-                }
-            }
-        }
-
-        /**
-         * update
-         * 
-         * Stores a column/value to be updated, by calling _inputs interally. If
-         * no arguments passed, calls itself with default columns/values
-         * 
-         * @access public
-         * @return void
-         */
-        public function update()
-        {
-            $this->_type = 'update';
-            $args = func_get_args();
-            if (empty($args)) {
-                throw new Exception(
-                    'Column must be specified for <update> method.'
-                );
-            }
-
-            // internal input routing
-            $args = func_get_args();
-            call_user_func_array(array($this, '_inputs'), $args);
-        }
-
-        /**
-         * insert
-         * 
-         * Stores a column/value to be inserted, by calling _inputs internally.
-         * If no arguments passed, calls itself with default columns/values
-         * 
-         * @access public
-         * @return void
-         */
-        public function insert()
-        {
-            $this->_type = 'insert';
-            $args = func_get_args();
-            call_user_func_array(array($this, '_inputs'), $args);
-        }
-
-        /**
-         * table
-         * 
-         * Records the tables that should be used for the statement, with their
-         * alias/key specified
-         * 
-         * @access public
-         * @return void
-         */
-        public function table()
+        public function filter()
         {
             $args = func_get_args();
-            foreach ($args as $arg) {
-                if (is_array($arg)) {
-                    foreach ($arg as $key => $value) {
-                        if (is_int($key)) {
-                            $this->table($value);
-                        } else {
-                            $this->_tables[$key] = $value;
-                        }
-                    }
-                } else {
-                    $this->_tables[] = $arg;
-                }
-            }
+            call_user_func_array(array($this, 'having'), $args);
         }
 
         /**
@@ -441,75 +350,6 @@
         {
             $args = func_get_args();
             call_user_func_array(array($this, 'table'), $args);
-        }
-
-        /**
-         * into
-         * 
-         * An alias of Query::table
-         * 
-         * @access public
-         * @return void
-         */
-        public function into()
-        {
-            $args = func_get_args();
-            call_user_func_array(array($this, 'table'), $args);
-        }
-
-        /**
-         * where
-         * 
-         * Sets the conditional's for a select or update statement
-         * 
-         * @access public
-         * @return void
-         */
-        public function where()
-        {
-            $args = func_get_args();
-            $this->_conditions[][] = call_user_func_array(
-                array($this, '_conditions'),
-                $args
-            );
-        }
-
-        /**
-         * andWhere
-         * 
-         * An alias of Query::where
-         * 
-         * @access public
-         * @return void
-         */
-        public function andWhere()
-        {
-            $args = func_get_args();
-            call_user_func_array(array($this, 'where'), $args);
-        }
-
-        /**
-         * orWhere
-         * 
-         * Makes the previous where call/conditions non-binding with a logical
-         * OR/or/|| condition
-         * 
-         * @access public
-         * @return void
-         */
-        public function orWhere()
-        {
-            if (empty($this->_conditions)) {
-                throw new Exception(
-                    'Query::orWhere call requires Query::where call first.'
-                );
-            }
-            $args = func_get_args();
-            call_user_func_array(array($this, 'where'), $args);
-            $condition = array_pop($this->_conditions);
-            $condition = $condition[0];
-            $last = &$this->_conditions[count($this->_conditions)-1];
-            array_push($last, $condition);
         }
 
         /**
@@ -542,53 +382,62 @@
         }
 
         /**
-         * orHaving
+         * insert
          * 
-         * Makes the previous having condition non-binding with a logical
-         * OR/or/|| condition
+         * Stores a column/value to be inserted, by calling _inputs internally.
+         * If no arguments passed, calls itself with default columns/values
          * 
          * @access public
          * @return void
          */
-        public function orHaving()
+        public function insert()
         {
-            if (empty($this->_conditions)) {
-                throw new Exception('Query::orHaving call requires Query::having call first.');
-            }
+            $this->_type = 'insert';
             $args = func_get_args();
-            call_user_func_array(array($this, 'having'), $args);
-            $condition = array_pop($this->_conditions);
-            $condition = $condition[0];
-            $last = &$this->_conditions[count($this->_conditions)-1];
-            array_push($last, $condition);
+            call_user_func_array(array($this, '_inputs'), $args);
         }
 
         /**
-         * filter
+         * into
          * 
-         * An alias of Query::having
+         * An alias of Query::table
          * 
          * @access public
          * @return void
          */
-        public function filter()
+        public function into()
         {
             $args = func_get_args();
-            call_user_func_array(array($this, 'having'), $args);
+            call_user_func_array(array($this, 'table'), $args);
         }
 
         /**
-         * orFilter
+         * limit
          * 
-         * An alias of Query::orHaving
+         * An alias of Query::rows
          * 
          * @access public
          * @return void
          */
-        public function orFilter()
+        public function limit()
         {
             $args = func_get_args();
-            call_user_func_array(array($this, 'orHaving'), $args);
+            call_user_func_array(array($this, 'rows'), $args);
+        }
+
+        /**
+         * offset
+         * 
+         * What row to begin the retrieval from
+         * 
+         * @access public
+         * @param  int $offset. (default: 0) what row to begin retrieval from
+         *         (aka the result-set's offset)
+         * @return void
+         */
+        public function offset($offset = 0)
+        {
+            $this->_offset = $offset;
         }
 
         /**
@@ -638,53 +487,63 @@
         }
 
         /**
-         * rows
+         * orFilter
          * 
-         * Sets the maximum number of rows to retrieve/update (select, update).
-         * Makes a sub-call to remove any offset directives from the query if
-         * there is no limit on the number of rows to be returned. SQL will
-         * throw an error if a query is evaluated that has an offset, but no
-         * limit.
-         * 
-         * @access public
-         * @param  int $rows number of rows to limit the result set by
-         * @return void
-         */
-        public function rows($rows = 10)
-        {
-            if ($rows === false || $rows === 0) {
-                $this->offset(false);
-            }
-            $this->_rows = $rows;
-        }
-
-        /**
-         * limit
-         * 
-         * An alias of Query::rows
+         * An alias of Query::orHaving
          * 
          * @access public
          * @return void
          */
-        public function limit()
+        public function orFilter()
         {
             $args = func_get_args();
-            call_user_func_array(array($this, 'rows'), $args);
+            call_user_func_array(array($this, 'orHaving'), $args);
         }
 
         /**
-         * offset
+         * orHaving
          * 
-         * What row to begin the retrieval from
+         * Makes the previous having condition non-binding with a logical
+         * OR/or/|| condition
          * 
          * @access public
-         * @param  int $offset. (default: 0) what row to begin retrieval from
-         *         (aka the result-set's offset)
          * @return void
          */
-        public function offset($offset = 0)
+        public function orHaving()
         {
-            $this->_offset = $offset;
+            if (empty($this->_conditions)) {
+                throw new Exception('Query::orHaving call requires Query::having call first.');
+            }
+            $args = func_get_args();
+            call_user_func_array(array($this, 'having'), $args);
+            $condition = array_pop($this->_conditions);
+            $condition = $condition[0];
+            $last = &$this->_conditions[count($this->_conditions)-1];
+            array_push($last, $condition);
+        }
+
+        /**
+         * orWhere
+         * 
+         * Makes the previous where call/conditions non-binding with a logical
+         * OR/or/|| condition
+         * 
+         * @access public
+         * @return void
+         */
+        public function orWhere()
+        {
+            if (empty($this->_conditions)) {
+                throw new Exception(
+                    'Query::orWhere call requires Query::where call first.'
+                );
+            }
+            $args = func_get_args();
+            call_user_func_array(array($this, 'where'), $args);
+            $condition = array_pop($this->_conditions);
+            $condition = $condition[0];
+            $last = &$this->_conditions[count($this->_conditions)-1];
+            array_push($last, $condition);
         }
 
         /**
@@ -959,5 +818,146 @@
                 }
             }
             return $statement;
+        }
+
+        /**
+         * rows
+         * 
+         * Sets the maximum number of rows to retrieve/update (select, update).
+         * Makes a sub-call to remove any offset directives from the query if
+         * there is no limit on the number of rows to be returned. SQL will
+         * throw an error if a query is evaluated that has an offset, but no
+         * limit.
+         * 
+         * @access public
+         * @param  int $rows number of rows to limit the result set by
+         * @return void
+         */
+        public function rows($rows = 10)
+        {
+            if ($rows === false || $rows === 0) {
+                $this->offset(false);
+            }
+            $this->_rows = $rows;
+        }
+
+        /**
+         * select
+         * 
+         * Sets the columns to return in a select statement
+         * 
+         * @access public
+         * @return void
+         */
+        public function select()
+        {
+            $this->_type = 'select';
+            $args = func_get_args();
+            if (empty($args)) {
+                $this->select('*');
+            } else {
+
+                // loop through arguments, formatting the primary key selection or adding the columns
+                foreach ($args as $arg) {
+
+                    // can't be if/elseif, need's to be consecutive
+                    if (!is_array($arg)) {
+                        $this->_columns[] = $arg;
+                    }
+                    if (is_array($arg)) {
+                        foreach ($arg as $key => $value) {
+                            if (is_int($key)) {
+                                $this->select($value);
+                            } else {
+                                $this->_columns[$key] = $value;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        /**
+         * sum
+         * 
+         * An alias of Query::select(array('sum' => 'SUM(column)')). Sets the
+         * sum of a column for the query to be selected
+         * 
+         * @access public
+         * @param  string $column column that should have it's sum calculated
+         * @param  string $name. (default: 'sum') the name/alias/key for the sum
+         * @return void
+         */
+        public function sum($column, $name = 'sum')
+        {
+            $this->select(array($name => 'SUM(' . ($column) . ')'));
+        }
+
+        /**
+         * table
+         * 
+         * Records the tables that should be used for the statement, with their
+         * alias/key specified
+         * 
+         * @access public
+         * @return void
+         */
+        public function table()
+        {
+            $args = func_get_args();
+            foreach ($args as $arg) {
+                if (is_array($arg)) {
+                    foreach ($arg as $key => $value) {
+                        if (is_int($key)) {
+                            $this->table($value);
+                        } else {
+                            $this->_tables[$key] = $value;
+                        }
+                    }
+                } else {
+                    $this->_tables[] = $arg;
+                }
+            }
+        }
+
+        /**
+         * update
+         * 
+         * Stores a column/value to be updated, by calling _inputs interally. If
+         * no arguments passed, calls itself with default columns/values
+         * 
+         * @access public
+         * @return void
+         */
+        public function update()
+        {
+            $this->_type = 'update';
+            $args = func_get_args();
+            if (empty($args)) {
+                throw new Exception(
+                    'Column must be specified for <update> method.'
+                );
+            }
+
+            // internal input routing
+            $args = func_get_args();
+            call_user_func_array(array($this, '_inputs'), $args);
+        }
+
+        /**
+         * where
+         * 
+         * Sets the conditional's for a select or update statement
+         * 
+         * @access public
+         * @return void
+         */
+        public function where()
+        {
+            $args = func_get_args();
+            $this->_conditions[][] = call_user_func_array(
+                array($this, '_conditions'),
+                $args
+            );
         }
     }
