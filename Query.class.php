@@ -203,14 +203,25 @@
                         $operand = '=';
                         $value = $args[1];
                         $auto = true;
-                        if (in_array(true, $args, true) || in_array(false, $args, true)) {
+
+                        /**
+                         * Conditions include specification (true or false,
+                         * doesn't matter which); automatically set the operand
+                         * to *IN* since there were only 3-parameters set;
+                         * otherwise since 3-parameters, assume operand properly
+                         * set in 2nd position
+                         */
+                        if (
+                            in_array(true, $args, true)
+                            || in_array(false, $args, true)
+                        ) {
                             $auto = end($args);
+                            if (is_array($value)) {
+                                $operand = 'IN';
+                            }
                         } else {
                             $operand = $args[1];
                             $value = $args[2];
-                        }
-                        if (is_array($value)) {
-                            $operand = 'IN';
                         }
                         $conditions = array_merge(
                             $conditions,
@@ -461,6 +472,8 @@
                                 $arg = array_values($arg);
                                 array_unshift($arg, $key);
                             }
+                        } elseif (count($arg) === 1) {
+                            $arg = array($arg, true);
                         }
                         if (is_object($arg)) {
                             $arg = array($arg);
@@ -558,6 +571,11 @@
          */
         public function parse()
         {
+            // no table found
+            if (empty($this->_tables)) {
+                throw new Exception('Table must be specified for query');
+            }
+
             // command
             if (is_null($this->_type)) {
                 throw new Exception(
@@ -658,11 +676,11 @@
                                         $value = '(' . implode(', ', $value) . ')';
                                     } else {
                                         $values = array();
-                                        foreach ($details[1] as $column) {
-                                            if (!is_int($column)) {
-                                                $values[] = '\'' . ($column) . '\'';
+                                        foreach ($details[1] as $subcolumn) {
+                                            if (!is_int($subcolumn)) {
+                                                $values[] = '\'' . ($subcolumn) . '\'';
                                             } else {
-                                                $values[] = $column;
+                                                $values[] = $subcolumn;
                                             }
                                         }
                                         $value = '(' . implode(', ', $values) . ')';
@@ -672,6 +690,7 @@
                                         $value = '\'' . ($value) . '\'';
                                     }
                                 }
+
                                 $and[] = ($column) . ' ' . ($details[0]) . ' ' . ($value);
                             }
                             if (count($and) === 1) {
@@ -715,11 +734,11 @@
                                         $value = '(' . implode(', ', $value) . ')';
                                     } else {
                                         $values = array();
-                                        foreach ($details[1] as $column) {
-                                            if (!is_int($column)) {
-                                                $values[] = '\'' . ($column) . '\'';
+                                        foreach ($details[1] as $subcolumn) {
+                                            if (!is_int($subcolumn)) {
+                                                $values[] = '\'' . ($subcolumn) . '\'';
                                             } else {
-                                                $values[] = $column;
+                                                $values[] = $subcolumn;
                                             }
                                         }
                                         $value = '(' . implode(', ', $values) . ')';
@@ -931,7 +950,13 @@
          */
         public function update()
         {
+            // set query type
             $this->_type = 'update';
+
+            // by default; remove limit on update query
+            $this->limit(false);
+
+            // argument retrieval for validation and storage
             $args = func_get_args();
             if (empty($args)) {
                 throw new Exception(

@@ -3,7 +3,7 @@
     /**
      * Query examples
      *
-     * This file contains numerous examples that showcase the various ways a
+     * This file contains dozens of examples that showcase the various ways a
      * query can be generated dynamically. These include all the API methods, as
      * well as all the ways parameters can be passed to these methods to
      * showcase the API's flexibility.
@@ -14,29 +14,35 @@
     /**
      * Select statements
      */
+
     $query = (new Query());
     $query->select();
     $query->from('users');
     echo $query->parse();
+
 
     $query = (new Query());
     $query->select('username');
     $query->from('users');
     echo $query->parse();
 
+
     $query = (new Query());
     $query->select('username', 'NOW()');
     $query->from('users');
     echo $query->parse();
+
 
     $query = (new Query());
     $query->select(array('username', 'first_name'));
     $query->from('users');
     echo $query->parse();
 
+
     /**
      * Aggregate select statements
      */
+
     $query = (new Query());
     $query->count();
     $query->average('column');
@@ -44,49 +50,71 @@
     $query->from('users');
     echo $query->parse();
 
+
     /**
      * Alias select statements
      */
+
     $query = (new Query());
     $query->select(
         array('u.username', 'u.first_name'),
         array('views' => 'us.views', 'us.logins')
     );
-    $query->from('users');
+    $query->from(array(
+        'u' => 'users',
+        'us' => 'user_settings'
+    ));
     echo $query->parse();
 
+
+    $subquery = (new Query());
+    $subquery->select('colour');
+    $subquery->from('favourites');
+    $subquery->where('username', 'users.username');
     $query = (new Query());
     $query->select(array('username', $subquery));
     $query->from('users');
     echo $query->parse();
+
 
     $query = (new Query());
     $query->select(array('un' => 'username', 'now' => 'NOW()'));
     $query->from('users');
     echo $query->parse();
 
+
+    $subquery = (new Query());
+    $subquery->select('views');
+    $subquery->from('analytics');
+    $subquery->where('uid', 'users.uid', false);
     $query = (new Query());
     $query->select(array('un' => 'username', 'views' => $subquery));
     $query->from('users');
     echo $query->parse();
 
+
     /**
      * Update statements
      */
+
     $query = (new Query());
     $query->update('username', 'onassar');
     $query->table('users');
     echo $query->parse();
 
+
     $query = (new Query());
     $query->update('views', 'views + 1', false);
     $query->table('users');
+    $query->limit(10);
     echo $query->parse();
+
 
     $query = (new Query());
     $query->update('timestamp_updated', 'NOW()');
     $query->table('users');
     echo $query->parse();
+
 
     $query = (new Query());
     $query->update(
@@ -98,11 +126,22 @@
     $query->table('users');
     echo $query->parse();
 
+
+    $subquery = (new Query());
+    $subquery->select('name');
+    $subquery->from('animals');
+    $subquery->limit(1);
     $query = (new Query());
     $query->update(array('username' => $subquery));
     $query->table('users');
+    $query->where('uid', 1);
     echo $query->parse();
 
+
+    $subquery = (new Query());
+    $subquery->select('name');
+    $subquery->from('animals');
+    $subquery->limit(1);
     $query = (new Query());
     $query->update(
         array('username', $subquery),
@@ -110,7 +149,9 @@
         array('timestamp_updated', 'NOW()')
     );
     $query->table('users');
+    $query->where('uid', 1);
     echo $query->parse();
+
 
     $query = (new Query());
     $query->update(
@@ -120,6 +161,7 @@
     );
     $query->table('users');
     echo $query->parse();
+
 
     $query = (new Query());
     $query->update(
@@ -132,81 +174,268 @@
     $query->table('users');
     echo $query->parse();
 
-    // insertion (<insert> method signature matches that of <update>)
-    $query = (new Query());
-    $query->insert();
 
-    // table selection
+    /**
+     * Insertions (<insert> method signature matches that of <update>)
+     */
+
+    $query = (new Query());
+    $query->insert(array(
+        'created' => 'NOW()',
+        'name' => 'Oliver Nassar',
+        'email' => 'onassar@gmail.com'
+    ));
+    $query->into('users');
+    echo $query->parse();
+
+
+    /**
+     * Table specification
+     */
+
+    $query = (new Query());
+    $query->select('uid');
     $query->table('users');
+    echo $query->parse();
+
+
+    $query = (new Query());
+    $query->select('users.uid', 'user_settings.views');
     $query->table('users', 'user_settings');
+    $query->where('user_settings.uid', 'users.uid', false);
+    echo $query->parse();
+
+
+    $query = (new Query());
+    $query->select('users.uid');
     $query->table(array('users', 'user_settings'));
+    $query->where('user_settings.uid', 'users.uid', false);
+    echo $query->parse();
+
+
+    $query = (new Query());
+    $query->select('u.uid');
     $query->table(
         array(
             'u' => 'users',
             'us' => 'user_settings'
         )
     );
+    $query->where('us.uid', 'u.uid', false);
+    echo $query->parse();
 
-    // <table> aliases
+
+    /**
+     * <table> method aliases
+     */
+
+    $query = (new Query());
     $query->from('users');
-    $query->into('users');
+    echo $query->parse();
 
-    // conditionals
+
+    $query = (new Query());
+    $query->into('users');
+    echo $query->parse();
+
+
+    /**
+     * Where conditionals
+     */
+
+    $query = (new Query());
+    $query->select();
+    $query->from('users');
     $query->where('department', 'engineering');
+    echo $query->parse();
+
+
+    $query = (new Query());
+    $query->select();
+    $query->from('users');
     $query->where('department', 'position', false);
+    echo $query->parse();
+
+
+    $query = (new Query());
+    $query->select();
+    $query->from('users');
     $query->where('age', '>', 10);
-    $query->where('age', '!=', 'oliver');
-    $query->where('age', '!=', 'first_name', false);
+    echo $query->parse();
+
+
+    $query = (new Query());
+    $query->select();
+    $query->from('users');
+    $query->where('first_name', '!=', 'Oliver');
+    echo $query->parse();
+
+
+    $query = (new Query());
+    $query->select();
+    $query->from('users');
+    $query->where('first_name', '!=', 'last_name', false);
+    echo $query->parse();
+
+
+    $query = (new Query());
+    $query->select();
+    $query->from('users');
     $query->where('department', array('engineering', 'administration'));
+    echo $query->parse();
+
+
+    $query = (new Query());
+    $query->select();
+    $query->from('users');
     $query->where('department', 'IN', array('engineering', 'administration'));
+    echo $query->parse();
+
+
+    $query = (new Query());
+    $query->select();
+    $query->from('users');
     $query->where('username', 'LIKE', 'live');
+    echo $query->parse();
+
+
+    $query = (new Query());
+    $query->select();
+    $query->from('users');
     $query->where(
         array('username', 'LIKE', 'live'),
         array('department', 'engineering'),
-        array('school', 'IN', $subquery),
         array('language' => 'english'),
-        array('sport' => array('=', 'basketball'))
+        array('sport' => array('=', 'basketball')),
+        array('hobby' => array('!=', 'team', false))
     );
+    echo $query->parse();
+
+
+    $subquery = (new Query());
+    $subquery->select('name');
+    $subquery->from('schools');
+    $query = (new Query());
+    $query->select();
+    $query->from('users');
     $query->where(array(
         'username' => 'onassar',
         'first_name' => array('LIKE', 'live'),
         array('school', 'IN', $subquery),
         array('sport', 'basetkball')
     ));
+    echo $query->parse();
 
-    // or-conditions (determined by previous <where> method call)
+
+    /**
+     * OR-Conditionals (determined by previous <where> method call)
+     */
+
+    $query = (new Query());
+    $query->select();
+    $query->from('users');
+    $query->where('department', 'athletics');
     $query->orWhere('department', 'administration');
+    echo $query->parse();
 
-    // grouping
+
+    $query = (new Query());
+    $query->select();
+    $query->from('users');
+    $query->where('name', 'Oliver Nassar');
+    $query->where(array(
+        'department' => 'athletics',
+        'role' => 'teacher'
+    ));
+    $query->orWhere('department', 'administration');
+    echo $query->parse();
+
+
+    /**
+     * Grouping
+     */
+
+    $query = (new Query());
+    $query->select();
+    $query->from('users');
     $query->groupBy('sport');
-    $query->groupBy('department', 'school');
+    echo $query->parse();
 
-    // filtering (matches <where> method signature)
+
+    $query = (new Query());
+    $query->select();
+    $query->from('users');
+    $query->groupBy('department', 'school');
+    echo $query->parse();
+
+
+    /**
+     * Filtering (matches <where> method signature)
+     */
+
+    $query = (new Query());
+    $query->select();
+    $query->from('users');
     $query->filter('department', 'engineering');
+    echo $query->parse();
+
 
     // <filter> alias
+    $query = (new Query());
+    $query->select();
+    $query->from('users');
     $query->having('department', 'engineering');
+    echo $query->parse();
 
-    // general ordering
+
+    /**
+     * Ordering
+     */
+
+    $query = (new Query());
+    $query->select();
+    $query->from('users');
     $query->orderBy('department');
+    echo $query->parse();
 
-    // descending ordering
+
+    // descending
+    $query = (new Query());
+    $query->select();
+    $query->from('users');
     $query->orderBy('time_logged_in', false);
+    echo $query->parse();
+
 
     // field ordering
+    $query = (new Query());
+    $query->select();
+    $query->from('users');
     $query->orderBy('department', array('admin', 'science', 'english'));
+    echo $query->parse();
 
-    // field ordering, following by descending sub-orderning
-    $query->orderBy('department', array('admin', 'science', 'english'), false);
 
-    // order by department, sub-query, time_logged_in desecnding, type,
-    // gender descending, school, parents-field descending
+    // field ordering (descending)
+    $query = (new Query());
+    $query->select();
+    $query->from('users');
+    $query->orderBy(
+        'department',
+        array('admin', 'science', 'english'),
+        false
+    );
+    echo $query->parse();
 
-$subquery = (new Query());
-$subquery->select('id');
-$subquery->from('users');
-$subquery->limit(1);
 
+    // multiple ordering
+    $subquery = (new Query());
+    $subquery->select('id');
+    $subquery->from('user_settings');
+    $subquery->where('id', 'users.id');
+    $subquery->limit(1);
+    $query = (new Query());
+    $query->select();
+    $query->from('users');
     $query->orderBy(array(
         'department',
         $subquery,
@@ -216,11 +445,47 @@ $subquery->limit(1);
         'school' => array(array('primary', 'middle', 'seconday')),
         'parents' => array(array('one', 'two'), false)
     ));
+    echo $query->parse();
 
-    // limit row counts retrieved to 100; remove any limit
+
+    /**
+     * Limiting
+     */
+
+    $query = (new Query());
+    $query->select();
+    $query->from('users');
     $query->rows(100);
-    $query->rows(0);
-    $query->rows(false);
+    echo $query->parse();
 
-    // begin select from 5th record (based on ordering)
+
+    $query = (new Query());
+    $query->select();
+    $query->from('users');
+    $query->rows(0);
+    echo $query->parse();
+
+
+    $query = (new Query());
+    $query->select();
+    $query->from('users');
+    $query->rows(false);
+    echo $query->parse();
+
+
+    /**
+     * Offsets (record-retrieval start point)
+     */
+
+    $query = (new Query());
+    $query->select();
+    $query->from('users');
     $query->offset(5);
+    echo $query->parse();
+
+
+    $query = (new Query());
+    $query->select();
+    $query->from('users');
+    $query->offset(false);
+    echo $query->parse();
