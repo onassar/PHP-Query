@@ -1,102 +1,139 @@
 <?php
 /*
-    $q = new Query();
-    $q = new Query('SELECT ...');
+    // select
+    $query->select();
+    $query->select('username');
+    $query->select('username', 'NOW()');
+    $query->select(array('username', 'first_name'));
 
-    $q->average('column');// alias of: $q->select(array('average' => 'AVG(column)'));
-    $q->count();// alias of: $q->select(array('count' => 'COUNT(status)'));
-    $q->sum('column');// alias of: $q->select(array('sum' => 'SUM(column)'));
+    // aggregates
+    $query->count();
+    $query->average('column');
+    $query->sum('column');
 
-    $q->select();// alias of: $q->select('*');
-    $q->select('username');
-    $q->select('username', 'NOW()');
-    $q->select(array('username', 'first_name'));
-    $q->select(array('u.username', 'u.first_name'), array('views' => 'us.views', 'us.logins'));
-    $q->select(array('username', $q));
-    $q->select(array('un' => 'username', 'now' => 'NOW()'));
-    $q->select(array('un' => 'username', 'profile_views' => $q));
+    // select aliasing
+    $query->select(
+        array('u.username', 'u.first_name'),
+        array('views' => 'us.views', 'us.logins')
+    );
+    $query->select(array('username', $subquery));
+    $query->select(array('un' => 'username', 'now' => 'NOW()'));
+    $query->select(array('un' => 'username', 'views' => $subquery));
 
-    $q->update();// alias of: $q->update('timestamp_updated', 'NOW()');
-    $q->update('username', 'onassar');
-    $q->update('timestamp_updated', 'NOW()');
-    $q->update('timestamp_updated', 'timestamp_updated', false);// false parameter tells parser to exclude apostrophes for string value; in this case, keep current timestamp_updated value
-    $q->update(array('username', $q), array('last_name', 'Nassar'), array('timestamp_updated', 'NOW()'));
-    $q->update(array('username' => 'onassar', 'first_name' => 'Oliver'));
-    $q->update(array('username' => $q));
-    $q->update(array('username' => 'onassar'), array('first_name' => 'Oliver'));
-    $q->update(array('username' => 'onassar'), array('first_name' => 'Oliver'), array('last_name', 'first_name', false));
-    $q->update(array('timestamp_updated' => array('onassar', false), 'first_name' => array('Oliver')));
+    // updates
+    $query->update('username', 'onassar');
+    $query->update('views', 'views + 1', false);
+    $query->update('timestamp_updated', 'NOW()');
+    $query->update(
+        array(
+            'username' => 'onassar',
+            'first_name' => 'Oliver'
+        )
+    );
+    $query->update(array('username' => $subquery));
+    $query->update(
+        array('username', $subquery),
+        array('last_name', 'Nassar'),
+        array('timestamp_updated', 'NOW()')
+    );
+    $query->update(
+        array('username' => 'onassar'),
+        array('first_name' => 'Oliver'),
+        array('last_name', 'first_name', false)
+    );
+    $query->update(
+        array(
+            'views' => array('views + 1', false),
+            'first_name' => 'Oliver',
+            'last_name' => array('Nassar')
+        )
+    );
 
-    $q->insert();// alias of: $q->insert(array('timestamp_created', 'NOW()'), array('timestamp_updated', 'NOW()'), array('status', 'open'), array('type', ''));
-    // rest of insert method matches `update` signature
+    // insertion (<insert> method signature matches that of <update>)
+    $query->insert();
 
-    $q->table('users');
-    $q->table('users', 'user_settings');
-    $q->table(array('users', 'user_settings'));
-    $q->table(array('u' => 'users', 'us' => 'user_settings'));
-    // from and into methods match table signature
-    $q->from('users');
-    $q->into('users');
+    // table selection
+    $query->table('users');
+    $query->table('users', 'user_settings');
+    $query->table(array('users', 'user_settings'));
+    $query->table(
+        array(
+            'u' => 'users',
+            'us' => 'user_settings'
+        )
+    );
 
-    $q->where('department', 'engineering');
-    $q->where('department', 'position', false);
-    $q->where('age', '>', 10);
-    $q->where('age', '!=', 'oliver');
-    $q->where('age', '!=', 'first_name', false);
-    $q->where('department', array('engineering', 'administration'));
-    $q->where('department', array('engineering', 'administration'), false);
-    $q->where('department', 'IN', array('engineering', 'administration'));
-    $q->where('department', 'IN', array('engineering', 'administration'), false);
-    $q->where('department', 'IN', 'engineering, administration');
-    $q->where('department', 'IN', 'engineering, administration', false);
-    $q->where('username', 'LIKE', 'live');
-    $q->where(
+    // <table> aliases
+    $query->from('users');
+    $query->into('users');
+
+    // conditionals
+    $query->where('department', 'engineering');
+    $query->where('department', 'position', false);
+    $query->where('age', '>', 10);
+    $query->where('age', '!=', 'oliver');
+    $query->where('age', '!=', 'first_name', false);
+    $query->where('department', array('engineering', 'administration'));
+    $query->where('department', 'IN', array('engineering', 'administration'));
+    $query->where('username', 'LIKE', 'live');
+    $query->where(
         array('username', 'LIKE', 'live'),
         array('department', 'engineering'),
-        array('school', 'IN', $q),
+        array('school', 'IN', $subquery),
         array('language' => 'english'),
         array('sport' => array('=', 'basketball'))
     );
-    $q->where(array(
+    $query->where(array(
         'username' => 'onassar',
         'first_name' => array('LIKE', 'live'),
-        array('school', 'IN', $q),
+        array('school', 'IN', $subquery),
         array('sport', 'basetkball')
     ));
-    // optional third/fourth parameter could, hypothetically, be a boolean which controls whether auto-apostrophe behaviour occurs
 
-    // orWhere method will apply to previous where call, and all conditions set during that call; signature matches where
-    $q->orWhere('department', 'administration');
+    // or-conditions (determined by previous <where> method call)
+    $query->orWhere('department', 'administration');
 
-    $q->groupBy('sport');
-    $q->groupBy('department', 'school');
+    // grouping
+    $query->groupBy('sport');
+    $query->groupBy('department', 'school');
 
-    $q->having('department', 'engineering');
-    // having methods matches where signature
-    $q->filter(...);
-    // filter is an alias of having
+    // filtering (matches <where> method signature)
+    $query->filter('department', 'engineering');
 
-    $q->orderBy('department');
-    $q->orderBy('time_logged_in', false);// descending
-    $q->orderBy('department', array('admin', 'science', 'english'));// order by field department
-    $q->orderBy('department', array('admin', 'science', 'english'), false);// order by field department, in descending order
-    $q->orderBy(array(
+    // <filter> alias
+    $query->having('department', 'engineering');
+
+    // general ordering
+    $query->orderBy('department');
+
+    // descending ordering
+    $query->orderBy('time_logged_in', false);
+
+    // field ordering
+    $query->orderBy('department', array('admin', 'science', 'english'));
+
+    // field ordering, following by descending sub-orderning
+    $query->orderBy('department', array('admin', 'science', 'english'), false);
+
+    // order by department, sub-query, time_logged_in desecnding, school-field,
+    // school-field descending, school-field, school-field descending
+    $query->orderBy(array(
         'department',
-        $q,
+        $subquery,
         'time_logged_in' => false,
         array('school', array('primary', 'secondary', 'post')),
         array('school', array('primary', 'secondary', 'post'), false),
         'school' => array(array('primary', 'secondary', 'post')),
         'school' => array(array('primary', 'secondary', 'post'), false)
-    ));// order by department, query, time_logged_in desecnding, field school, field school descending, field school, field school descending
+    ));
 
-    $q->rows(100);
-    $q->offset(5);
+    // limit row counts retrieved to 100; remove any limit
+    $query->rows(100);
+    $query->rows(0);
+    $query->rows(false);
 
-    $q->parse();
-
-    $results = $q->run();
-    $results = $q->run('SELECT ...');
+    // begin select from 5th record (based on ordering)
+    $query->offset(5);
 */
 
     /**
@@ -111,18 +148,8 @@
      *         have no value, and can be used to properly filter checks that are
      *         based on standard usage of the Query class, such as
      *         $this->from(), $this->where(), etc.)
-     *         unlike most classes, which have methods/properties ordered
-     *         alphabetically, those in this class are ordered by expected SQL
-     *         statement organization; so for example, first select, then table,
-     *         then where conditions, etc.
-     * @todo   turn into an abstract class to save on instances being created,
-     *         which costs a lot of memory
-     * @todo   create an instantiable wrapper for this class which access this
-     *         class abstractly, to save on memory
      * @todo   either switch the apostrophes for splitting to `, or make sure
      *         apostrophes are escaped
-     * @todo   think about removing call_user_func* references and using array_map
-     *         instead, when useful (check if either is faster than the other)
      */
     class Query
     {
@@ -141,10 +168,10 @@
          * 
          * Columns/fields that should be selected from the database
          * 
-         * @var    array
+         * @var    array (default: array())
          * @access protected
          */
-        protected $_columns;
+        protected $_columns = array();
 
         /**
          * _inputs
@@ -152,10 +179,10 @@
          * Input (columns:values) that should be used in CU operationsw (insert,
          * update)
          * 
-         * @var    array
+         * @var    array (default: array())
          * @access protected
          */
-        protected $_inputs;
+        protected $_inputs = array();
 
         /**
          * _tables
@@ -163,30 +190,30 @@
          * List of tables, and optionally their aliases for the query, for usage
          * in the call
          * 
-         * @var    array
+         * @var    array (default: array())
          * @access protected
          */
-        protected $_tables;
+        protected $_tables = array();
 
         /**
          * _conditions
          * 
          * Conditions for a query to execute (select, update)
          * 
-         * @var    array
+         * @var    array (default: array())
          * @access protected
          */
-        protected $_conditions;
+        protected $_conditions = array();
 
         /**
          * _groupings
          * 
          * Columns/fields whereby a result set should be grouped into/by
          * 
-         * @var    array
+         * @var    array (default: array())
          * @access protected
          */
-        protected $_groupings;
+        protected $_groupings = array();
 
         /**
          * _filters
@@ -194,10 +221,10 @@
          * Filters that should be applied to a result set after it has been
          * returned by the database
          * 
-         * @var    array
+         * @var    array (default: array())
          * @access protected
          */
-        protected $_filters;
+        protected $_filters = array();
 
         /**
          * _orders
@@ -205,10 +232,10 @@
          * Columns and orderings for a result set to be returned/updated
          * (select, update)
          * 
-         * @var array
+         * @var    array (default: array())
          * @access protected
          */
-        protected $_orders;
+        protected $_orders = array();
 
         /**
          * _rows
@@ -216,47 +243,29 @@
          * Number of rows that should be returned for a statement (select,
          * update)
          * 
-         * @var    int
+         * @var    int (default: 10)
          * @access protected
          */
-        protected $_rows;
+        protected $_rows = 10;
 
         /**
          * _offset
          * 
          * Where a select query should begin it's search
          * 
-         * @var    int
+         * @var    int (default: 0)
          * @access protected
          */
-        protected $_offset;
+        protected $_offset = 0;
 
         /**
          * __construct
-         * 
-         * Instantiates a new Query object, with an optional SQL statement
-         * parameter to bypass automated usage/parsing.
          * 
          * @access public
          * @return void
          */
         public function __construct()
         {
-            $this->_type = '';
-            $this->_columns = array();
-            $this->_inputs = array();
-            $this->_tables = array();
-            $this->_conditions = array(
-                array(
-                    array('status' => array('=', 'open', true))
-                )
-            );
-            $this->_groupings = array();
-            $this->_filters = array();
-            $this->_orders = array();
-            $this->_rows = 10;
-            $this->_offset = 0;
-            $this->_statement = null;
         }
 
         /**
@@ -507,13 +516,14 @@
             $this->_type = 'update';
             $args = func_get_args();
             if (empty($args)) {
-                $this->update(
-                    array('timestamp_updated', 'NOW()')
+                throw new Exception(
+                    'Column must be specified for <update> method.'
                 );
-            } else {
-                $args = func_get_args();
-                call_user_func_array(array($this, '_inputs'), $args);
             }
+
+            // internal input routing
+            $args = func_get_args();
+            call_user_func_array(array($this, '_inputs'), $args);
         }
 
         /**
@@ -770,15 +780,19 @@
         /**
          * rows
          * 
-         * Sets the maximum number of rows to retrieve/update (select, update)
+         * Sets the maximum number of rows to retrieve/update (select, update).
+         * Makes a sub-call to remove any offset directives from the query if
+         * there is no limit on the number of rows to be returned. SQL will
+         * throw an error if a query is evaluated that has an offset, but no
+         * limit.
          * 
          * @access public
-         * @param int $rows number of rows to limit the result set by
+         * @param  int $rows number of rows to limit the result set by
          * @return void
          */
         public function rows($rows = 10)
         {
-            if ($rows === false) {
+            if ($rows === false || $rows === 0) {
                 $this->offset(false);
             }
             $this->_rows = $rows;
@@ -801,11 +815,11 @@
         /**
          * offset
          * 
-         * What row to begin retrieval's from
+         * What row to begin the retrieval from
          * 
          * @access public
-         * @param int $offset. (default: 0) what row to begin retrieval from
-         * (aka the result set's offset)
+         * @param  int $offset. (default: 0) what row to begin retrieval from
+         *         (aka the result-set's offset)
          * @return void
          */
         public function offset($offset = 0)
@@ -826,13 +840,13 @@
         public function parse()
         {
             // command
-            if ($this->_type === null) {
+            if (is_null($this->_type)) {
                 throw new Exception(
                     'Query::$type must be specified by calling Query::select,' .
                     'Query::update, or Query::insert.'
                 );
             }
-            $command = mb_strtoupper($this->_type);
+            $command = strtoupper($this->_type);
             if ($this->_type === 'insert') {
                 $command .= ' INTO';
             }
@@ -903,7 +917,7 @@
                 if (is_int($alias)) {
                     $tables[] = $table;
                 } else {
-                    $tables[] = ($alias) . ' AS ' . ($table);
+                    $tables[] = ($table) . ' AS ' . ($alias);
                 }
             }
             $tables = implode(', ', $tables);
