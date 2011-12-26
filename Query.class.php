@@ -287,7 +287,7 @@
         /**
          * andWhere
          * 
-         * An alias of Query::where
+         * An alias of <where>
          * 
          * @access public
          * @return void
@@ -338,7 +338,7 @@
         /**
          * filter
          * 
-         * An alias of Query::having
+         * An alias of <having>
          * 
          * @access public
          * @return void
@@ -352,7 +352,7 @@
         /**
          * from
          * 
-         * An alias of Query::table
+         * An alias of <table>
          * 
          * @access public
          * @return void
@@ -403,7 +403,18 @@
          */
         public function insert()
         {
+            // set query type
             $this->_type = 'insert';
+
+            // argument retrieval for validation and storage
+            $args = func_get_args();
+            if (empty($args)) {
+                throw new Exception(
+                    'Column must be specified for <insert> method.'
+                );
+            }
+
+            // internal input routing
             $args = func_get_args();
             call_user_func_array(array($this, '_inputs'), $args);
         }
@@ -411,7 +422,7 @@
         /**
          * into
          * 
-         * An alias of Query::table
+         * An alias of <table>
          * 
          * @access public
          * @return void
@@ -425,7 +436,7 @@
         /**
          * limit
          * 
-         * An alias of Query::rows
+         * An alias of <rows>
          * 
          * @access public
          * @return void
@@ -502,7 +513,7 @@
         /**
          * orFilter
          * 
-         * An alias of Query::orHaving
+         * An alias of <orHaving>
          * 
          * @access public
          * @return void
@@ -525,7 +536,7 @@
         public function orHaving()
         {
             if (empty($this->_conditions)) {
-                throw new Exception('Query::orHaving call requires Query::having call first.');
+                throw new Exception('<orHaving> call requires <having> call first.');
             }
             $args = func_get_args();
             call_user_func_array(array($this, 'having'), $args);
@@ -548,7 +559,7 @@
         {
             if (empty($this->_conditions)) {
                 throw new Exception(
-                    'Query::orWhere call requires Query::where call first.'
+                    '<orWhere> call requires <where> call first.'
                 );
             }
             $args = func_get_args();
@@ -579,8 +590,8 @@
             // command
             if (is_null($this->_type)) {
                 throw new Exception(
-                    'Query::$type must be specified by calling Query::select,' .
-                    'Query::update, or Query::insert.'
+                    'Query::$type must be specified by calling <select>,' .
+                    '<update>, or <insert>.'
                 );
             }
             $command = strtoupper($this->_type);
@@ -953,7 +964,11 @@
             // set query type
             $this->_type = 'update';
 
-            // by default; remove limit on update query
+            /**
+             * By default; remove limit on update query; note that this is set
+             * here, rather than in the <parse> method, to allow for it to be
+             * overridden
+             */
             $this->limit(false);
 
             // argument retrieval for validation and storage
