@@ -230,11 +230,13 @@
      */
 
     $query = (new Query());
+    $query->select();
     $query->from('users');
     echo $query->parse();
 
 
     $query = (new Query());
+    $query->insert('first_name', 'Oliver');
     $query->into('users');
     echo $query->parse();
 
