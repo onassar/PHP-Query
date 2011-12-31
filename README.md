@@ -44,5 +44,5 @@ your application.
 
 Any potential speed or memory hits that you may take, however, could (and
 should) be circumvented by using a proper caching engine, class
-([PHP-MemcachedCache](https://github.com/onassar/PHP-MemcachedCache)/
+(see [PHP-MemcachedCache](https://github.com/onassar/PHP-MemcachedCache) and/or
 [PHP-APCCache](https://github.com/onassar/PHP-APCCache)) and flow.
