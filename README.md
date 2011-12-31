@@ -13,28 +13,28 @@ and maintain.
 
 ### API Samples
 
-    // select a username&#039;s details
+    // select a username's details
     $query = (new Query());
-    $query->select(&#039;*&#039;);
-    $query->from(&#039;users&#039;);
-    $query->where(&#039;username&#039;, &#039;onassar&#039;);
+    $query->select('*');
+    $query->from('users');
+    $query->where('username', 'onassar');
     $parsed = $query->parse();
 
     // update a user record
     $query = (new Query());
-    $query->update(&#039;fname&#039;, &#039;Oliver&#039;);
-    $query->table(&#039;users&#039;);
-    $query->where(&#039;username&#039;, &#039;onassar&#039;);
+    $query->update('fname', 'Oliver');
+    $query->table('users');
+    $query->where('username', 'onassar');
     $parsed = $query->parse();
 
     // insert a user record
     $query = (new Query());
     $query->insert(array(
-        &#039;fname&#039;, &#039;Oliver&#039;,
-        &#039;lname&#039;, &#039;Nassar&#039;,
-        &#039;username&#039;, &#039;onassar&#039;
+        'fname', 'Oliver',
+        'lname', 'Nassar',
+        'username', 'onassar'
     ));
-    $query->into(&#039;users&#039;);
+    $query->into('users');
     $parsed = $query->parse();
 
 ### Performance
