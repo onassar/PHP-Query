@@ -2,12 +2,11 @@ PHP Query
 ===
 
 PHP-Query contains a single, instantiable, class, which provides a PHP ORM like
-API for plain and straightforward query generation.
-
+API for plain and straightforward query generation.  
 Queries are not executed by the class or ORM, but rather return the SQL
-statement that ought to be run against a database resource.
-
-While it is modeled after the [ActiveRecord](http://en.wikipedia.org/wiki/Active_record_pattern)
+statement that ought to be run against a database resource.  
+While it is modelled after the
+[ActiveRecord](http://en.wikipedia.org/wiki/Active_record_pattern)
 pattern, it follows plain language that I felt would make code easier to read
 and maintain.
 
