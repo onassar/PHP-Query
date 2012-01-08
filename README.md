@@ -13,6 +13,9 @@ and maintain.
 
 ### API Samples
 
+``` php
+<?php
+
     // select a username's details
     $query = (new Query());
     $query->select('*');
@@ -36,6 +39,7 @@ and maintain.
     ));
     $query->into('users');
     $parsed = $query->parse();
+```
 
 ### Performance
 Worth mentioning is that this approach to database-access isn&#039;t ideal for
