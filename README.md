@@ -38,6 +38,7 @@ and maintain.
     ));
     $query->into('users');
     $parsed = $query->parse();
+
 ```
 
 ### Performance
