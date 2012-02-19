@@ -285,6 +285,19 @@
         }
 
         /**
+         * __toString
+         * 
+         * An alias of <parse>
+         * 
+         * @access public
+         * @return void
+         */
+        public function __toString()
+        {
+            return $this->parse();
+        }
+
+        /**
          * andWhere
          * 
          * An alias of <where>
