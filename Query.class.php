@@ -129,6 +129,19 @@
         }
 
         /**
+         * __toString
+         * 
+         * An alias of <parse>
+         * 
+         * @access public
+         * @return void
+         */
+        public function __toString()
+        {
+            return $this->parse();
+        }
+
+        /**
          * _conditions
          * 
          * Sets passed in conditions to a specific format, and returns
@@ -282,19 +295,6 @@
                     break;
                 }
             }
-        }
-
-        /**
-         * __toString
-         * 
-         * An alias of <parse>
-         * 
-         * @access public
-         * @return void
-         */
-        public function __toString()
-        {
-            return $this->parse();
         }
 
         /**
@@ -604,7 +604,7 @@
             if (is_null($this->_type)) {
                 throw new Exception(
                     'Query::$type must be specified by calling <select>,' .
-                    '<update>, or <insert>.'
+                    '<set>, or <insert>.'
                 );
             }
             $command = strtoupper($this->_type);
@@ -921,6 +921,40 @@
         }
 
         /**
+         * set
+         * 
+         * Stores a column/value to be updated, by calling _inputs interally. If
+         * no arguments passed, calls itself with default columns/values
+         * 
+         * @access public
+         * @return void
+         */
+        public function set()
+        {
+            // set query type
+            $this->_type = 'update';
+
+            /**
+             * By default; remove limit on update query; note that this is set
+             * here, rather than in the <parse> method, to allow for it to be
+             * overridden
+             */
+            $this->limit(false);
+
+            // argument retrieval for validation and storage
+            $args = func_get_args();
+            if (empty($args)) {
+                throw new Exception(
+                    'Column must be specified for <set> method.'
+                );
+            }
+
+            // internal input routing
+            $args = func_get_args();
+            call_user_func_array(array($this, '_inputs'), $args);
+        }
+
+        /**
          * sum
          * 
          * An alias of Query::select(array('sum' => 'SUM(column)')). Sets the
@@ -966,41 +1000,21 @@
         /**
          * update
          * 
-         * Stores a column/value to be updated, by calling _inputs interally. If
-         * no arguments passed, calls itself with default columns/values
+         * An alias of <table>
          * 
          * @access public
          * @return void
          */
         public function update()
         {
-            // set query type
-            $this->_type = 'update';
-
-            /**
-             * By default; remove limit on update query; note that this is set
-             * here, rather than in the <parse> method, to allow for it to be
-             * overridden
-             */
-            $this->limit(false);
-
-            // argument retrieval for validation and storage
             $args = func_get_args();
-            if (empty($args)) {
-                throw new Exception(
-                    'Column must be specified for <update> method.'
-                );
-            }
-
-            // internal input routing
-            $args = func_get_args();
-            call_user_func_array(array($this, '_inputs'), $args);
+            call_user_func_array(array($this, 'table'), $args);
         }
 
         /**
          * where
          * 
-         * Sets the conditional's for a select or update statement
+         * Sets the conditionals for a select or set statement
          * 
          * @access public
          * @return void

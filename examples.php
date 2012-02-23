@@ -98,32 +98,32 @@
      */
 
     $query = (new Query());
-    $query->update('username', 'onassar');
-    $query->table('users');
+    $query->update('users');
+    $query->set('username', 'onassar');
     echo $query->parse();
 
 
     $query = (new Query());
-    $query->update('views', 'views + 1', false);
-    $query->table('users');
+    $query->update('users');
+    $query->set('views', 'views + 1', false);
     $query->limit(10);
     echo $query->parse();
 
 
     $query = (new Query());
-    $query->update('timestamp_updated', 'NOW()');
-    $query->table('users');
+    $query->update('users');
+    $query->set('timestamp_updated', 'NOW()');
     echo $query->parse();
 
 
     $query = (new Query());
-    $query->update(
+    $query->update('users');
+    $query->set(
         array(
             'username' => 'onassar',
             'first_name' => 'Oliver'
         )
     );
-    $query->table('users');
     echo $query->parse();
 
 
@@ -132,8 +132,8 @@
     $subquery->from('animals');
     $subquery->limit(1);
     $query = (new Query());
-    $query->update(array('username' => $subquery));
-    $query->table('users');
+    $query->update('users');
+    $query->set(array('username' => $subquery));
     $query->where('uid', 1);
     echo $query->parse();
 
@@ -143,35 +143,35 @@
     $subquery->from('animals');
     $subquery->limit(1);
     $query = (new Query());
-    $query->update(
+    $query->update('users');
+    $query->set(
         array('username', $subquery),
         array('last_name', 'Nassar'),
         array('timestamp_updated', 'NOW()')
     );
-    $query->table('users');
     $query->where('uid', 1);
     echo $query->parse();
 
 
     $query = (new Query());
-    $query->update(
+    $query->update('users');
+    $query->set(
         array('username' => 'onassar'),
         array('first_name' => 'Oliver'),
         array('last_name', 'first_name', false)
     );
-    $query->table('users');
     echo $query->parse();
 
 
     $query = (new Query());
-    $query->update(
+    $query->update('users');
+    $query->set(
         array(
             'views' => array('views + 1', false),
             'first_name' => 'Oliver',
             'last_name' => array('Nassar')
         )
     );
-    $query->table('users');
     echo $query->parse();
 
 
