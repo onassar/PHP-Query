@@ -345,7 +345,7 @@
     $query->select();
     $query->from('users');
     $query->where('name', 'Oliver Nassar');
-    $query->where(array(
+    $query->andWhere(array(
         'department' => 'athletics',
         'role' => 'teacher'
     ));
