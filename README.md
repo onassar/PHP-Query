@@ -24,8 +24,8 @@ and maintain.
 
     // update a user record
     $query = (new Query());
-    $query->update('fname', 'Oliver');
-    $query->table('users');
+    $query->update('users');
+    $query->set('fname', 'Oliver');
     $query->where('username', 'onassar');
     $parsed = $query->parse();
 
