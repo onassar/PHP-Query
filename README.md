@@ -24,8 +24,8 @@ and maintain.
 
     // update a user record
     $query = (new Query());
-    $query->update('fname', 'Oliver');
-    $query->table('users');
+    $query->update('users');
+    $query->set('fname', 'Oliver');
     $query->where('username', 'onassar');
     $parsed = $query->parse();
 
@@ -50,3 +50,23 @@ Any potential speed or memory hits that you may take, however, could (and
 should) be circumvented by using a proper caching engine, class
 (see [PHP-MemcachedCache](https://github.com/onassar/PHP-MemcachedCache) and/or
 [PHP-APCCache](https://github.com/onassar/PHP-APCCache)) and flow.
+
+### Update
+Regarding the section above, I've stumbled upon some information suggesting that
+during the filter stage of generating a query, the performance will be effected
+if a `varchar` column has it's value compared without apostrophes. Presumably,
+the converse is true.
+
+As an example, `U.username = 12345` should be written as
+`U.username = '12345'`.
+
+The `Query` class presumes that all columns are varchars, and thus wraps the
+values in apostrophes. The only exception to this is when a third parameter is
+pased to the `where` method.
+
+`$query->where('user_id', 1)` will be rendered as `WHERE user_id = '1'` vs the
+proper `WHERE user_id = '1'`. Passing in that third parameter forces the
+apostrophes to be left off the value definition.
+
+Keep this in mind if you're concerned about the performance of oftenly executed
+queries, especially if they're part of any indices.
