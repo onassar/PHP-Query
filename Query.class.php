@@ -9,7 +9,9 @@
      * 
      * @author Oliver Nassar <onassar@gmail.com>
      * @todo   either switch the apostrophes for splitting to `, or make sure
-     *         apostrophes are escaped
+     *         apostrophes are escaped; the result of *not* doing this is
+     *         potential sql-injections or failing-queries (the former being
+     *         more serious)
      */
     class Query
     {
