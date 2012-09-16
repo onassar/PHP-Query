@@ -246,7 +246,20 @@
                             )
                         );
                     } elseif (count($args) === 4) {
-                        $conditions[$args[0]] = array(
+
+                        /**
+                         * Check here is done to allow a subquery (of Query
+                         * type) to be specified as a column name to be matched
+                         * against a value.
+                         */
+                        $column = $args[0];
+                        if (
+                            is_object($args[0])
+                            && gettype($args[0]) === gettype($this)
+                        ) {
+                            $column = '(' . ($args[0]) . ')';
+                        }
+                        $conditions[$column] = array(
                             $args[1],
                             $args[2],
                             $args[3]
