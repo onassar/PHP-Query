@@ -32,9 +32,9 @@ and maintain.
     // insert a user record
     $query = (new Query());
     $query->insert(array(
-        'fname', 'Oliver',
-        'lname', 'Nassar',
-        'username', 'onassar'
+        'fname' => 'Oliver',
+        'lname' => 'Nassar',
+        'username' => 'onassar'
     ));
     $query->into('users');
     $parsed = $query->parse();
