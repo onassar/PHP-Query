@@ -623,7 +623,7 @@
                 );
             }
             $command = strtoupper($this->_type);
-            if ($this->_type === 'insert') {
+            if ($this->_type === 'insert' || $this->_type === 'replace') {
                 $command .= ' INTO';
             }
 
@@ -665,7 +665,7 @@
                     $inputs[] = $exp;
                 }
                 $inputs = implode(', ', $inputs);
-            } elseif ($this->_type === 'insert') {
+            } elseif ($this->_type === 'insert' || $this->_type === 'replace') {
                 $columns = array();
                 $values = array();
                 foreach ($this->_inputs as $column => $details) {
@@ -859,7 +859,7 @@
                 if (empty($offset) === false || $offset === 0) {
                     $statement .= ' OFFSET ' . ($offset);
                 }
-            } elseif ($this->_type === 'insert') {
+            } elseif ($this->_type === 'insert' || $this->_type === 'replace') {
                 $statement .= ' ' . ($tables);
                 $statement .= ' (' . implode(', ', $columns) . ')';
                 $statement .= ' VALUES (' . implode(', ', $values) . ')';
@@ -933,6 +933,30 @@
                     }
                 }
             }
+        }
+
+        /**
+         * replace
+         * 
+         * @access public
+         * @return void
+         */
+        public function replace()
+        {
+            // set query type
+            $this->_type = 'replace';
+
+            // argument retrieval for validation and storage
+            $args = func_get_args();
+            if (empty($args)) {
+                throw new Exception(
+                    'Column must be specified for <replace> method.'
+                );
+            }
+
+            // internal input routing
+            $args = func_get_args();
+            call_user_func_array(array($this, '_inputs'), $args);
         }
 
         /**
