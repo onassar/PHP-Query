@@ -68,6 +68,16 @@
         protected $_inputs = array();
 
         /**
+         * _lockType
+         * 
+         * Whether the locking call should prevent reading or writing
+         * 
+         * @var    array (default: null)
+         * @access protected
+         */
+        protected $_lockType = null;
+
+        /**
          * _offset
          * 
          * Where a select query should begin it's search
@@ -476,6 +486,21 @@
         }
 
         /**
+         * lock
+         * 
+         * @access public
+         * @param  string $table
+         * @param  type $lockType
+         * @return void
+         */
+        public function lock($table, $lockType)
+        {
+            $this->_type = 'lock';
+            $this->table($table);
+            $this->_lockType = $lockType;
+        }
+
+        /**
          * offset
          * 
          * What row to begin the retrieval from
@@ -612,7 +637,9 @@
         {
             // no table found
             if (empty($this->_tables)) {
-                throw new Exception('Table must be specified for query');
+                if ($this->_type !== 'unlock') {
+                    throw new Exception('Table must be specified for query');
+                }
             }
 
             // command
@@ -689,6 +716,7 @@
             }
 
             // tables
+            $tables = array();
             foreach ($this->_tables as $alias => $table) {
                 if (is_int($alias)) {
                     $tables[] = $table;
@@ -874,6 +902,12 @@
                 if (empty($rows) === false) {
                     $statement .= ' LIMIT ' . ($rows);
                 }
+            } elseif ($this->_type === 'lock') {
+                $statement .= ' TABLES';
+                $statement .= ' ' . ($tables);
+                $statement .= ' ' . strtoupper($this->_lockType);
+            } elseif ($this->_type === 'unlock') {
+                $statement .= ' TABLES';
             }
             return $statement;
         }
@@ -1034,6 +1068,17 @@
                     $this->_tables[] = $arg;
                 }
             }
+        }
+
+        /**
+         * unlock
+         * 
+         * @access public
+         * @return void
+         */
+        public function unlock()
+        {
+            $this->_type = 'unlock';
         }
 
         /**

@@ -491,3 +491,13 @@
     $query->from('users');
     $query->offset(false);
     echo $query->parse();
+
+
+    /**
+     * Locking/Unlocking
+     */
+
+    $query = (new Query());
+    $query->lock('table', 'read');
+    $query->lock('table', 'write');
+    $query->unlock();
