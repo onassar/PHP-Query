@@ -495,9 +495,13 @@
          */
         public function lock($tables, $lockType)
         {
+            foreach ($tables as $key => $table) {
+                $tables[$key] = ($table) . ' ' . strtoupper($lockType);
+            }
             $this->_type = 'lock';
             $this->table($tables);
-            $this->_lockType = $lockType;
+            // $this->_lockType = $lockType;
+            $this->_lockType = '';// Temporary
         }
 
         /**
