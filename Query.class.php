@@ -489,14 +489,14 @@
          * lock
          * 
          * @access public
-         * @param  string $table
+         * @param  array $tables
          * @param  type $lockType
          * @return void
          */
-        public function lock($table, $lockType)
+        public function lock($tables, $lockType)
         {
             $this->_type = 'lock';
-            $this->table($table);
+            $this->table($tables);
             $this->_lockType = $lockType;
         }
 
