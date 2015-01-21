@@ -374,6 +374,19 @@
         }
 
         /**
+         * delete
+         * 
+         * @access public
+         * @return void
+         */
+        public function delete()
+        {
+            $this->_type = 'delete';
+            $args = func_get_args();
+            call_user_func_array(array($this, 'table'), $args);
+        }
+
+        /**
          * filter
          * 
          * An alias of <having>
@@ -650,7 +663,7 @@
             if (is_null($this->_type)) {
                 throw new Exception(
                     'Query::$type must be specified by calling <select>,' .
-                    '<set>, or <insert>.'
+                    '<set>, <delete> or <insert>.'
                 );
             }
             $command = strtoupper($this->_type);
@@ -731,7 +744,7 @@
             $tables = implode(', ', $tables);
 
             // conditions
-            if (in_array($this->_type, array('select', 'update'))) {
+            if (in_array($this->_type, array('delete', 'select', 'update'))) {
                 $conditions = array();
                 if (!empty($this->_conditions)) {
                     foreach ($this->_conditions as $clause) {
@@ -838,7 +851,7 @@
             }
 
             // orders
-            if (in_array($this->_type, array('select', 'update'))) {
+            if (in_array($this->_type, array('delete', 'select', 'update'))) {
                 $orders = array();
                 if (!empty($this->_orders)) {
                     foreach ($this->_orders as $rule) {
@@ -860,7 +873,7 @@
             }
 
             // limits/rows
-            if (in_array($this->_type, array('select', 'update'))) {
+            if (in_array($this->_type, array('delete', 'select', 'update'))) {
                 $rows = $this->_rows;
             }
 
@@ -890,6 +903,17 @@
                 }
                 if (empty($offset) === false || $offset === 0) {
                     $statement .= ' OFFSET ' . ($offset);
+                }
+            } elseif ($this->_type === 'delete') {
+                $statement .= ' FROM ' . ($tables);
+                if (empty($conditions) === false) {
+                    $statement .= ' WHERE ' . ($conditions);
+                }
+                if (empty($orders) === false) {
+                    $statement .= ' ORDER BY ' . ($orders);
+                }
+                if (empty($rows) === false) {
+                    $statement .= ' LIMIT ' . ($rows);
                 }
             } elseif ($this->_type === 'insert' || $this->_type === 'replace') {
                 $statement .= ' ' . ($tables);
