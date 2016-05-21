@@ -535,7 +535,7 @@
         /**
          * orderBy
          * 
-         * Sets the order expressions for an SQL select or update statement
+         * Sets the order expressions for an SQL select or update statement.
          * 
          * @access public
          * @return void
@@ -544,7 +544,9 @@
         {
             $args = func_get_args();
             if (count($args) === 1) {
-                if (is_array($args[0])) {
+                if ($args[0] === false) {
+                    $this->_orders = array();
+                } elseif (is_array($args[0])) {
                     foreach ($args[0] as $key => $arg) {
                         if (is_string($key)) {
                             if (is_bool($arg)) {
