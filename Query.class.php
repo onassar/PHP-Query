@@ -523,8 +523,8 @@
          * What row to begin the retrieval from
          * 
          * @access public
-         * @param  int $offset. (default: 0) what row to begin retrieval from
-         *         (aka the result-set's offset)
+         * @param  integer $offset. (default: 0) what row to begin retrieval
+         *         from (aka the result-set's offset)
          * @return void
          */
         public function offset($offset = 0)
@@ -952,7 +952,7 @@
          * limit.
          * 
          * @access public
-         * @param  int $rows number of rows to limit the result set by
+         * @param  integer $rows number of rows to limit the result set by
          * @return void
          */
         public function rows($rows = 10)
