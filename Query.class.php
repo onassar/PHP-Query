@@ -82,7 +82,7 @@
          * 
          * Where a select query should begin it's search
          * 
-         * @var    int (default: 0)
+         * @var    integer (default: 0)
          * @access protected
          */
         protected $_offset = 0;
@@ -104,7 +104,7 @@
          * Number of rows that should be returned for a statement (select,
          * update)
          * 
-         * @var    int (default: 10)
+         * @var    integer (default: 10)
          * @access protected
          */
         protected $_rows = 10;
