@@ -614,7 +614,7 @@
             call_user_func_array(array($this, 'having'), $args);
             $condition = array_pop($this->_conditions);
             $condition = $condition[0];
-            $last = &$this->_conditions[count($this->_conditions)-1];
+            $last = &$this->_conditions[count($this->_conditions) - 1];
             array_push($last, $condition);
         }
 
@@ -638,7 +638,7 @@
             call_user_func_array(array($this, 'where'), $args);
             $condition = array_pop($this->_conditions);
             $condition = $condition[0];
-            $last = &$this->_conditions[count($this->_conditions)-1];
+            $last = &$this->_conditions[count($this->_conditions) - 1];
             array_push($last, $condition);
         }
 
