@@ -215,7 +215,7 @@
                 } else {
                     if (count($args) === 2) {
                         $operand = '=';
-                        if (is_array($args[1])) {
+                        if (is_array($args[1]) === true) {
                             $operand = 'IN';
                         }
                         $conditions = array_merge(
@@ -265,7 +265,7 @@
                          */
                         $column = $args[0];
                         if (
-                            is_object($args[0])
+                            is_object($args[0]) === true
                             && gettype($args[0]) === gettype($this)
                         ) {
                             $column = '(' . ($args[0]) . ')';
@@ -299,7 +299,7 @@
             foreach ($args as $arg) {
                 if (is_array($arg) === true) {
                     $keys = array_keys($arg);
-                    if (is_string($keys[0])) {
+                    if (is_string($keys[0]) === true) {
                         foreach ($arg as $sub => $value) {
                             if (is_array($value) === true) {
                                 $params = $value;
@@ -312,7 +312,7 @@
                     } else {
                         call_user_func_array(array($this, '_inputs'), $arg);
                     }
-                } elseif (is_string($arg)) {
+                } elseif (is_string($arg) === true) {
                     if (count($args) === 2) {
                         $this->_inputs[$args[0]] = array($args[1], true);
                     } elseif (count($args) === 3) {
@@ -547,9 +547,9 @@
             if (count($args) === 1) {
                 if ($args[0] === false) {
                     $this->_orders = array();
-                } elseif (is_array($args[0])) {
+                } elseif (is_array($args[0]) === true) {
                     foreach ($args[0] as $key => $arg) {
-                        if (is_string($key)) {
+                        if (is_string($key) === true) {
                             if (is_bool($arg)) {
                                 $arg = array($key, $arg);
                             } elseif (is_array($arg) === true) {
@@ -559,7 +559,7 @@
                         } elseif (count($arg) === 1) {
                             $arg = array($arg, true);
                         }
-                        if (is_object($arg)) {
+                        if (is_object($arg) === true) {
                             $arg = array($arg);
                         }
                         call_user_func_array(array($this, 'orderBy'), $arg);
@@ -570,7 +570,7 @@
             } elseif (count($args) === 2) {
                 if (is_bool($args[1])) {
                     $this->_orders[] = array($args[0], array(), $args[1]);
-                } elseif (is_array($args[1])) {
+                } elseif (is_array($args[1]) === true) {
                     $this->_orders[] = array($args[0], $args[1], true);
                 } else {
                     throw new Exception(
@@ -608,7 +608,7 @@
          */
         public function orHaving()
         {
-            if (empty($this->_conditions)) {
+            if (empty($this->_conditions) === true) {
                 throw new Exception('<orHaving> call requires <having> call first.');
             }
             $args = func_get_args();
@@ -630,7 +630,7 @@
          */
         public function orWhere()
         {
-            if (empty($this->_conditions)) {
+            if (empty($this->_conditions) === true) {
                 throw new Exception(
                     '<orWhere> call requires <where> call first.'
                 );
@@ -656,14 +656,14 @@
         public function parse()
         {
             // no table found
-            if (empty($this->_tables)) {
+            if (empty($this->_tables) === true) {
                 if ($this->_type !== 'unlock') {
                     throw new Exception('Table must be specified for query');
                 }
             }
 
             // command
-            if (is_null($this->_type)) {
+            if (is_null($this->_type) === true) {
                 throw new Exception(
                     'Query::$type must be specified by calling <select>,' .
                     '<set>, <delete> or <insert>.'
@@ -679,10 +679,10 @@
                 $columns = array();
                 foreach ($this->_columns as $key => $column) {
                     $exp = $column;
-                    if (is_object($column)) {
+                    if (is_object($column) === true) {
                         $exp = '(' . ($column->parse()) . ')';
                     }
-                    if (is_string($key)) {
+                    if (is_string($key) === true) {
                         $exp .= ' AS ' . ($key);
                     }
                     $columns[] = $exp;
@@ -695,11 +695,11 @@
                 $inputs = array();
                 foreach ($this->_inputs as $column => $details) {
                     $exp = ($column) . ' = ';
-                    if (is_object($details[0])) {
+                    if (is_object($details[0]) === true) {
                         $exp .= '(' . ($details[0]->parse()) . ')';
                     } elseif ($details[1] === true) {
                         if (
-                            is_int($details[0])
+                            is_int($details[0]) === true
                             || in_array($details[0], array('NOW()'))
                         ) {
                             $exp .= $details[0];
@@ -717,11 +717,11 @@
                 $values = array();
                 foreach ($this->_inputs as $column => $details) {
                     $columns[] = $column;
-                    if (is_object($details[0])) {
+                    if (is_object($details[0]) === true) {
                         $value = '(' . ($details[0]->parse()) . ')';
                     } elseif ($details[1] === true) {
                         if (
-                            is_int($details[0])
+                            is_int($details[0]) === true
                             || in_array($details[0], array('NOW()'))
                         ) {
                             $value = $details[0];
@@ -738,7 +738,7 @@
             // tables
             $tables = array();
             foreach ($this->_tables as $alias => $table) {
-                if (is_int($alias)) {
+                if (is_int($alias) === true) {
                     $tables[] = $table;
                 } else {
                     $tables[] = ($table) . ' AS ' . ($alias);
@@ -756,7 +756,7 @@
                             $and = array();
                             foreach ($inclusionary as $column => $details) {
                                 $value = $details[1];
-                                if (is_object($value)) {
+                                if (is_object($value) === true) {
                                     $value = '(' . ($value->parse()) . ')';
                                 } elseif (is_array($value) === true) {
                                     if ($details[2] === false) {
@@ -814,7 +814,7 @@
                             $and = array();
                             foreach ($inclusionary as $column => $details) {
                                 $value = $details[1];
-                                if (is_object($value)) {
+                                if (is_object($value) === true) {
                                     $value = '(' . ($value->parse()) . ')';
                                 } elseif (is_array($value) === true) {
                                     if ($details[2] === false) {
@@ -859,7 +859,7 @@
                 if (empty($this->_orders) === false) {
                     foreach ($this->_orders as $rule) {
                         $column = $rule[0];
-                        if (is_object($column)) {
+                        if (is_object($column) === true) {
                             $column = '(' . ($column->parse()) . ')';
                         }
                         $exp = $column;
@@ -989,7 +989,7 @@
                     }
                     if (is_array($arg) === true) {
                         foreach ($arg as $key => $value) {
-                            if (is_int($key)) {
+                            if (is_int($key) === true) {
                                 $this->select($value);
                             } else {
                                 $this->_columns[$key] = $value;
@@ -1089,7 +1089,7 @@
             foreach ($args as $arg) {
                 if (is_array($arg) === true) {
                     foreach ($arg as $key => $value) {
-                        if (is_int($key)) {
+                        if (is_int($key) === true) {
                             $this->table($value);
                         } else {
                             $this->_tables[$key] = $value;
