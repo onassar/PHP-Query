@@ -238,8 +238,8 @@
                          * set in 2nd position
                          */
                         if (
-                            in_array(true, $args, true)
-                            || in_array(false, $args, true)
+                            in_array(true, $args, true) === true
+                            || in_array(false, $args, true) === true
                         ) {
                             $auto = end($args);
                             if (is_array($value) === true) {
@@ -550,7 +550,7 @@
                 } elseif (is_array($args[0]) === true) {
                     foreach ($args[0] as $key => $arg) {
                         if (is_string($key) === true) {
-                            if (is_bool($arg)) {
+                            if (is_bool($arg) === true) {
                                 $arg = array($key, $arg);
                             } elseif (is_array($arg) === true) {
                                 $arg = array_values($arg);
@@ -568,7 +568,7 @@
                     $this->_orders[] = array($args[0], array(), true);
                 }
             } elseif (count($args) === 2) {
-                if (is_bool($args[1])) {
+                if (is_bool($args[1]) === true) {
                     $this->_orders[] = array($args[0], array(), $args[1]);
                 } elseif (is_array($args[1]) === true) {
                     $this->_orders[] = array($args[0], $args[1], true);
@@ -722,7 +722,7 @@
                     } elseif ($details[1] === true) {
                         if (
                             is_int($details[0]) === true
-                            || in_array($details[0], array('NOW()'))
+                            || in_array($details[0], array('NOW()')) === true
                         ) {
                             $value = $details[0];
                         } else {
@@ -747,7 +747,12 @@
             $tables = implode(', ', $tables);
 
             // conditions
-            if (in_array($this->_type, array('delete', 'select', 'update'))) {
+            if (
+                in_array(
+                    $this->_type,
+                    array('delete', 'select', 'update')
+                ) === true
+            ) {
                 $conditions = array();
                 if (empty($this->_conditions) === false) {
                     foreach ($this->_conditions as $clause) {
@@ -797,7 +802,7 @@
             }
 
             // groupings
-            if (in_array($this->_type, array('select'))) {
+            if (in_array($this->_type, array('select')) === true) {
                 $groupings = array();
                 if (empty($this->_groupings) === false) {
                     $groupings = implode(', ', $this->_groupings);
@@ -805,7 +810,7 @@
             }
 
             // filters
-            if (in_array($this->_type, array('select', 'update'))) {
+            if (in_array($this->_type, array('select', 'update')) === true) {
                 $filters = array();
                 if (empty($this->_filters) === false) {
                     foreach ($this->_filters as $clause) {
@@ -854,7 +859,12 @@
             }
 
             // orders
-            if (in_array($this->_type, array('delete', 'select', 'update'))) {
+            if (
+                in_array(
+                    $this->_type,
+                    array('delete', 'select', 'update')
+                ) === true
+            ) {
                 $orders = array();
                 if (empty($this->_orders) === false) {
                     foreach ($this->_orders as $rule) {
@@ -876,7 +886,12 @@
             }
 
             // limits/rows
-            if (in_array($this->_type, array('delete', 'select', 'update'))) {
+            if (
+                in_array(
+                    $this->_type,
+                    array('delete', 'select', 'update')
+                ) === true
+            ) {
                 $rows = $this->_rows;
             }
 
