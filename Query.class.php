@@ -7,11 +7,12 @@
      * other libraries. Queries are *not* processed by this ORM, but rather
      * parsed and made available through the <parse> method.
      * 
-     * @author Oliver Nassar <onassar@gmail.com>
-     * @todo   either switch the apostrophes for splitting to `, or make sure
-     *         apostrophes are escaped; the result of *not* doing this is
-     *         potential sql-injections or failing-queries (the former being
-     *         more serious)
+     * @todo    either switch the apostrophes for splitting to `, or make sure
+     *          apostrophes are escaped; the result of *not* doing this is
+     *          potential sql-injections or failing-queries (the former being
+     *          more serious)
+     * @link    https://github.com/onassar/PHP-Query
+     * @author  Oliver Nassar <onassar@gmail.com>
      */
     class Query
     {
@@ -20,8 +21,8 @@
          * 
          * Columns/fields that should be selected from the database
          * 
-         * @var    array (default: array())
-         * @access protected
+         * @var     array (default: array())
+         * @access  protected
          */
         protected $_columns = array();
 
@@ -30,8 +31,8 @@
          * 
          * Conditions for a query to execute (select, update)
          * 
-         * @var    array (default: array())
-         * @access protected
+         * @var     array (default: array())
+         * @access  protected
          */
         protected $_conditions = array();
 
@@ -41,8 +42,8 @@
          * Filters that should be applied to a result set after it has been
          * returned by the database
          * 
-         * @var    array (default: array())
-         * @access protected
+         * @var     array (default: array())
+         * @access  protected
          */
         protected $_filters = array();
 
@@ -51,8 +52,8 @@
          * 
          * Columns/fields whereby a result set should be grouped into/by
          * 
-         * @var    array (default: array())
-         * @access protected
+         * @var     array (default: array())
+         * @access  protected
          */
         protected $_groupings = array();
 
@@ -62,8 +63,8 @@
          * Input (columns:values) that should be used in create/update
          * operations (<insert> and <update> methods)
          * 
-         * @var    array (default: array())
-         * @access protected
+         * @var     array (default: array())
+         * @access  protected
          */
         protected $_inputs = array();
 
@@ -72,8 +73,8 @@
          * 
          * Whether the locking call should prevent reading or writing
          * 
-         * @var    array (default: null)
-         * @access protected
+         * @var     array (default: null)
+         * @access  protected
          */
         protected $_lockType = null;
 
@@ -82,8 +83,8 @@
          * 
          * Where a select query should begin it's search
          * 
-         * @var    integer (default: 0)
-         * @access protected
+         * @var     integer (default: 0)
+         * @access  protected
          */
         protected $_offset = 0;
 
@@ -93,8 +94,8 @@
          * Columns and orderings for a result set to be returned/updated
          * (select, update)
          * 
-         * @var    array (default: array())
-         * @access protected
+         * @var     array (default: array())
+         * @access  protected
          */
         protected $_orders = array();
 
@@ -104,8 +105,8 @@
          * Number of rows that should be returned for a statement (select,
          * update)
          * 
-         * @var    integer (default: 10)
-         * @access protected
+         * @var     integer (default: 10)
+         * @access  protected
          */
         protected $_rows = 10;
 
@@ -115,8 +116,8 @@
          * List of tables, and optionally their aliases for the query, for usage
          * in the call
          * 
-         * @var    array (default: array())
-         * @access protected
+         * @var     array (default: array())
+         * @access  protected
          */
         protected $_tables = array();
 
@@ -125,16 +126,16 @@
          * 
          * Type of query that should be run (select, update, ...)
          * 
-         * @var    string
-         * @access protected
+         * @var     string
+         * @access  protected
          */
         protected $_type;
 
         /**
          * __construct
          * 
-         * @access public
-         * @return void
+         * @access  public
+         * @return  void
          */
         public function __construct()
         {
@@ -145,8 +146,8 @@
          * 
          * An alias of <parse>
          * 
-         * @access public
-         * @return void
+         * @access  public
+         * @return  void
          */
         public function __toString()
         {
@@ -159,8 +160,8 @@
          * Sets passed in conditions to a specific format, and returns
          * (recursively) the results. Used by having and where methods
          * 
-         * @access protected
-         * @return array conditions as formatted to the proper internal
+         * @access  protected
+         * @return  array conditions as formatted to the proper internal
          *         pattern, for assignment to either $this->where or
          *         $this->_filters properties
          */
@@ -169,12 +170,12 @@
             $conditions = array();
             $args = func_get_args();
             foreach ($args as $key => $arg) {
-                if (is_array($arg)) {
+                if (is_array($arg) === true) {
                     $numeric = true;
                     foreach ($arg as $sub => $value) {
-                        if (!is_int($sub)) {
+                        if (is_int($sub) === false) {
                             $numeric = false;
-                            if (is_array($value)) {
+                            if (is_array($value) === true) {
                                 $conditions = array_merge(
                                     $conditions,
                                     call_user_func_array(
@@ -191,7 +192,7 @@
                                     )
                                 );
                             }
-                        } elseif (is_array($value)) {
+                        } elseif (is_array($value) === true) {
                             $numeric = false;
                             $conditions = array_merge(
                                 $conditions,
@@ -241,7 +242,7 @@
                             || in_array(false, $args, true)
                         ) {
                             $auto = end($args);
-                            if (is_array($value)) {
+                            if (is_array($value) === true) {
                                 $operand = 'IN';
                             }
                         } else {
@@ -287,20 +288,20 @@
          * Formats an input (update/insert) call to have it's data stored in a
          * consistent/organized way for parsing
          * 
-         * @notes  third optional parameter in a call is whether or not to
-         *         auto-add apostrophes
-         * @access protected
-         * @return void
+         * @note    third optional parameter in a call is whether or not to
+         *          auto-add apostrophes
+         * @access  protected
+         * @return  void
          */
         protected function _inputs()
         {
             $args = func_get_args();
             foreach ($args as $arg) {
-                if (is_array($arg)) {
+                if (is_array($arg) === true) {
                     $keys = array_keys($arg);
                     if (is_string($keys[0])) {
                         foreach ($arg as $sub => $value) {
-                            if (is_array($value)) {
+                            if (is_array($value) === true) {
                                 $params = $value;
                                 array_unshift($params, $sub);
                                 call_user_func_array(array($this, '_inputs'), $params);
@@ -327,8 +328,8 @@
          * 
          * An alias of <where>
          * 
-         * @access public
-         * @return void
+         * @access  public
+         * @return  void
          */
         public function andWhere()
         {
@@ -342,11 +343,11 @@
          * An alias of Query::select(array('average' => 'AVG(column)')). Sets
          * the average of a column for the query to be selected
          * 
-         * @access public
-         * @param  string $column column that should have it's average calculated
-         * @param  string $name. (default: 'average') the name/alias/key for the
-         *         average
-         * @return void
+         * @access  public
+         * @param   string $column column that should have it's average calculated
+         * @param   string $name. (default: 'average') the name/alias/key for the
+         *          average
+         * @return  void
          */
         public function average($column, $name = 'average')
         {
@@ -359,14 +360,14 @@
          * An alias of Query::select(array('count' => 'COUNT(status)')). Sets
          * the number of columns for the query to be selected
          * 
-         * @notes  $coloumn could be something like `DISTINCT user_id` for more
-         *         accurate/flexible counting
-         * @access public
-         * @param  string $column. (default: '1') the column that should be used
-         *         for counting
-         * @param  string $name. (default: 'count') the name/alias/key for the
-         *         count
-         * @return void
+         * @note    $coloumn could be something like `DISTINCT user_id` for more
+         *          accurate/flexible counting
+         * @access  public
+         * @param   string $column. (default: '1') the column that should be used
+         *          for counting
+         * @param   string $name. (default: 'count') the name/alias/key for the
+         *          count
+         * @return  void
          */
         public function count($column = '1', $name = 'count')
         {
@@ -376,8 +377,8 @@
         /**
          * delete
          * 
-         * @access public
-         * @return void
+         * @access  public
+         * @return  void
          */
         public function delete()
         {
@@ -391,8 +392,8 @@
          * 
          * An alias of <having>
          * 
-         * @access public
-         * @return void
+         * @access  public
+         * @return  void
          */
         public function filter()
         {
@@ -405,8 +406,8 @@
          * 
          * An alias of <table>
          * 
-         * @access public
-         * @return void
+         * @access  public
+         * @return  void
          */
         public function from()
         {
@@ -420,8 +421,8 @@
          * Specifies what columns/fields an SQL result set should be grouped
          * into
          * 
-         * @access public
-         * @return void
+         * @access  public
+         * @return  void
          */
         public function groupBy()
         {
@@ -434,8 +435,8 @@
          * 
          * Sets the filters/having conditions for a select statement
          * 
-         * @access public
-         * @return void
+         * @access  public
+         * @return  void
          */
         public function having()
         {
@@ -449,8 +450,8 @@
          * Stores a column/value to be inserted, by calling _inputs internally.
          * If no arguments passed, calls itself with default columns/values
          * 
-         * @access public
-         * @return void
+         * @access  public
+         * @return  void
          */
         public function insert()
         {
@@ -459,7 +460,7 @@
 
             // argument retrieval for validation and storage
             $args = func_get_args();
-            if (empty($args)) {
+            if (empty($args) === true) {
                 throw new Exception(
                     'Column must be specified for <insert> method.'
                 );
@@ -475,8 +476,8 @@
          * 
          * An alias of <table>
          * 
-         * @access public
-         * @return void
+         * @access  public
+         * @return  void
          */
         public function into()
         {
@@ -489,8 +490,8 @@
          * 
          * An alias of <rows>
          * 
-         * @access public
-         * @return void
+         * @access  public
+         * @return  void
          */
         public function limit()
         {
@@ -501,12 +502,12 @@
         /**
          * lock
          * 
-         * @access public
-         * @param  array $tables
-         * @param  type $lockType
-         * @return void
+         * @access  public
+         * @param   array $tables
+         * @param   type $lockType
+         * @return  void
          */
-        public function lock($tables, $lockType)
+        public function lock(array $tables, $lockType)
         {
             foreach ($tables as $key => $table) {
                 $tables[$key] = ($table) . ' ' . strtoupper($lockType);
@@ -522,10 +523,10 @@
          * 
          * What row to begin the retrieval from
          * 
-         * @access public
-         * @param  integer $offset. (default: 0) what row to begin retrieval
-         *         from (aka the result-set's offset)
-         * @return void
+         * @access  public
+         * @param   integer $offset. (default: 0) what row to begin retrieval
+         *          from (aka the result-set's offset)
+         * @return  void
          */
         public function offset($offset = 0)
         {
@@ -537,8 +538,8 @@
          * 
          * Sets the order expressions for an SQL select or update statement.
          * 
-         * @access public
-         * @return void
+         * @access  public
+         * @return  void
          */
         public function orderBy()
         {
@@ -551,7 +552,7 @@
                         if (is_string($key)) {
                             if (is_bool($arg)) {
                                 $arg = array($key, $arg);
-                            } elseif (is_array($arg)) {
+                            } elseif (is_array($arg) === true) {
                                 $arg = array_values($arg);
                                 array_unshift($arg, $key);
                             }
@@ -587,8 +588,8 @@
          * 
          * An alias of <orHaving>
          * 
-         * @access public
-         * @return void
+         * @access  public
+         * @return  void
          */
         public function orFilter()
         {
@@ -602,8 +603,8 @@
          * Makes the previous having condition non-binding with a logical
          * OR/or/|| condition
          * 
-         * @access public
-         * @return void
+         * @access  public
+         * @return  void
          */
         public function orHaving()
         {
@@ -624,8 +625,8 @@
          * Makes the previous where call/conditions non-binding with a logical
          * OR/or/|| condition
          * 
-         * @access public
-         * @return void
+         * @access  public
+         * @return  void
          */
         public function orWhere()
         {
@@ -648,8 +649,8 @@
          * Creates a valid SQL statement based on the properties set by this
          * instance of the Query class
          * 
-         * @access public
-         * @return string valid, minified, SQL statement ready to be
+         * @access  public
+         * @return  string valid, minified, SQL statement ready to be
          *         executed/run
          */
         public function parse()
@@ -748,7 +749,7 @@
             // conditions
             if (in_array($this->_type, array('delete', 'select', 'update'))) {
                 $conditions = array();
-                if (!empty($this->_conditions)) {
+                if (empty($this->_conditions) === false) {
                     foreach ($this->_conditions as $clause) {
                         $or = array();
                         foreach ($clause as $inclusionary) {
@@ -757,13 +758,13 @@
                                 $value = $details[1];
                                 if (is_object($value)) {
                                     $value = '(' . ($value->parse()) . ')';
-                                } elseif (is_array($value)) {
+                                } elseif (is_array($value) === true) {
                                     if ($details[2] === false) {
                                         $value = '(' . implode(', ', $value) . ')';
                                     } else {
                                         $values = array();
                                         foreach ($details[1] as $subcolumn) {
-                                            if (!is_int($subcolumn)) {
+                                            if (is_int($subcolumn) === false) {
                                                 $values[] = '\'' . ($subcolumn) . '\'';
                                             } else {
                                                 $values[] = $subcolumn;
@@ -772,7 +773,7 @@
                                         $value = '(' . implode(', ', $values) . ')';
                                     }
                                 } elseif ($details[2] === true) {
-                                    if (!is_int($value)) {
+                                    if (is_int($value) === false) {
                                         $value = '\'' . ($value) . '\'';
                                     }
                                 }
@@ -798,7 +799,7 @@
             // groupings
             if (in_array($this->_type, array('select'))) {
                 $groupings = array();
-                if (!empty($this->_groupings)) {
+                if (empty($this->_groupings) === false) {
                     $groupings = implode(', ', $this->_groupings);
                 }
             }
@@ -806,7 +807,7 @@
             // filters
             if (in_array($this->_type, array('select', 'update'))) {
                 $filters = array();
-                if (!empty($this->_filters)) {
+                if (empty($this->_filters) === false) {
                     foreach ($this->_filters as $clause) {
                         $or = array();
                         foreach ($clause as $inclusionary) {
@@ -815,13 +816,13 @@
                                 $value = $details[1];
                                 if (is_object($value)) {
                                     $value = '(' . ($value->parse()) . ')';
-                                } elseif (is_array($value)) {
+                                } elseif (is_array($value) === true) {
                                     if ($details[2] === false) {
                                         $value = '(' . implode(', ', $value) . ')';
                                     } else {
                                         $values = array();
                                         foreach ($details[1] as $subcolumn) {
-                                            if (!is_int($subcolumn)) {
+                                            if (is_int($subcolumn) === false) {
                                                 $values[] = '\'' . ($subcolumn) . '\'';
                                             } else {
                                                 $values[] = $subcolumn;
@@ -830,7 +831,7 @@
                                         $value = '(' . implode(', ', $values) . ')';
                                     }
                                 } elseif ($details[2] === true) {
-                                    if (!is_int($value)) {
+                                    if (is_int($value) === false) {
                                         $value = '\'' . ($value) . '\'';
                                     }
                                 }
@@ -855,14 +856,14 @@
             // orders
             if (in_array($this->_type, array('delete', 'select', 'update'))) {
                 $orders = array();
-                if (!empty($this->_orders)) {
+                if (empty($this->_orders) === false) {
                     foreach ($this->_orders as $rule) {
                         $column = $rule[0];
                         if (is_object($column)) {
                             $column = '(' . ($column->parse()) . ')';
                         }
                         $exp = $column;
-                        if (!empty($rule[1])) {
+                        if (empty($rule[1]) === false) {
                             $exp = 'field(' . ($exp) . ', \'' . implode('\', \'', $rule[1]) . '\')';
                         }
                         if ($rule[2] === false) {
@@ -880,7 +881,7 @@
             }
 
             // offset
-            if (in_array($this->_type, array('select'))) {
+            if (in_array($this->_type, array('select')) === true) {
                 $offset = $this->_offset;
             }
 
@@ -951,9 +952,9 @@
          * throw an error if a query is evaluated that has an offset, but no
          * limit.
          * 
-         * @access public
-         * @param  integer $rows number of rows to limit the result set by
-         * @return void
+         * @access  public
+         * @param   integer $rows number of rows to limit the result set by
+         * @return  void
          */
         public function rows($rows = 10)
         {
@@ -968,14 +969,14 @@
          * 
          * Sets the columns to return in a select statement
          * 
-         * @access public
-         * @return void
+         * @access  public
+         * @return  void
          */
         public function select()
         {
             $this->_type = 'select';
             $args = func_get_args();
-            if (empty($args)) {
+            if (empty($args) === true) {
                 $this->select('*');
             } else {
 
@@ -983,10 +984,10 @@
                 foreach ($args as $arg) {
 
                     // can't be if/elseif, need's to be consecutive
-                    if (!is_array($arg)) {
+                    if (is_array($arg) === false) {
                         $this->_columns[] = $arg;
                     }
-                    if (is_array($arg)) {
+                    if (is_array($arg) === true) {
                         foreach ($arg as $key => $value) {
                             if (is_int($key)) {
                                 $this->select($value);
@@ -1002,8 +1003,8 @@
         /**
          * replace
          * 
-         * @access public
-         * @return void
+         * @access  public
+         * @return  void
          */
         public function replace()
         {
@@ -1012,7 +1013,7 @@
 
             // argument retrieval for validation and storage
             $args = func_get_args();
-            if (empty($args)) {
+            if (empty($args) === true) {
                 throw new Exception(
                     'Column must be specified for <replace> method.'
                 );
@@ -1029,8 +1030,8 @@
          * Stores a column/value to be updated, by calling _inputs interally. If
          * no arguments passed, calls itself with default columns/values
          * 
-         * @access public
-         * @return void
+         * @access  public
+         * @return  void
          */
         public function set()
         {
@@ -1046,7 +1047,7 @@
 
             // argument retrieval for validation and storage
             $args = func_get_args();
-            if (empty($args)) {
+            if (empty($args) === true) {
                 throw new Exception(
                     'Column must be specified for <set> method.'
                 );
@@ -1063,10 +1064,10 @@
          * An alias of Query::select(array('sum' => 'SUM(column)')). Sets the
          * sum of a column for the query to be selected
          * 
-         * @access public
-         * @param  string $column column that should have it's sum calculated
-         * @param  string $name. (default: 'sum') the name/alias/key for the sum
-         * @return void
+         * @access  public
+         * @param   string $column column that should have it's sum calculated
+         * @param   string $name. (default: 'sum') the name/alias/key for the sum
+         * @return  void
          */
         public function sum($column, $name = 'sum')
         {
@@ -1079,14 +1080,14 @@
          * Records the tables that should be used for the statement, with their
          * alias/key specified
          * 
-         * @access public
-         * @return void
+         * @access  public
+         * @return  void
          */
         public function table()
         {
             $args = func_get_args();
             foreach ($args as $arg) {
-                if (is_array($arg)) {
+                if (is_array($arg) === true) {
                     foreach ($arg as $key => $value) {
                         if (is_int($key)) {
                             $this->table($value);
@@ -1103,8 +1104,8 @@
         /**
          * unlock
          * 
-         * @access public
-         * @return void
+         * @access  public
+         * @return  void
          */
         public function unlock()
         {
@@ -1116,8 +1117,8 @@
          * 
          * An alias of <table>
          * 
-         * @access public
-         * @return void
+         * @access  public
+         * @return  void
          */
         public function update()
         {
@@ -1130,8 +1131,8 @@
          * 
          * Sets the conditionals for a select or set statement
          * 
-         * @access public
-         * @return void
+         * @access  public
+         * @return  void
          */
         public function where()
         {

@@ -8,7 +8,7 @@
      * well as all the ways parameters can be passed to these methods to
      * showcase the API's flexibility.
      *
-     * @author Oliver Nassar <onassar@gmail.com>
+     * @author  Oliver Nassar <onassar@gmail.com>
      */
 
     /**
