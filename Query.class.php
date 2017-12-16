@@ -782,7 +782,6 @@
                                         $value = '\'' . ($value) . '\'';
                                     }
                                 }
-
                                 $and[] = ($column) . ' ' . ($details[0]) . ' ' . ($value);
                             }
                             if (count($and) === 1) {
