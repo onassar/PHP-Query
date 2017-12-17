@@ -162,8 +162,8 @@
          * 
          * @access  protected
          * @return  array conditions as formatted to the proper internal
-         *         pattern, for assignment to either $this->where or
-         *         $this->_filters properties
+         *          pattern, for assignment to either $this->where or
+         *          $this->_filters properties
          */
         protected function _conditions()
         {
@@ -651,7 +651,7 @@
          * 
          * @access  public
          * @return  string valid, minified, SQL statement ready to be
-         *         executed/run
+         *          executed/run
          */
         public function parse()
         {
