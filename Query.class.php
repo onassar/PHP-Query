@@ -967,7 +967,8 @@
          * limit.
          * 
          * @access  public
-         * @param   integer $rows number of rows to limit the result set by
+         * @param   false|integer $rows number of rows to limit the result set
+         *          by
          * @return  void
          */
         public function rows($rows = 10)
