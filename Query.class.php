@@ -425,6 +425,9 @@
                 }
                 return $strs;
             } else {
+                if ($value === '*') {
+                    return $value;
+                }
                 if ($value === 'COUNT(1)') {
                     return $value;
                 }
