@@ -19,7 +19,7 @@
         /**
          * _columns
          * 
-         * Columns/fields that should be selected from the database
+         * Columns/fields that should be selected from the database.
          * 
          * @var     array (default: array())
          * @access  protected
@@ -29,7 +29,7 @@
         /**
          * _conditions
          * 
-         * Conditions for a query to execute (select, update)
+         * Conditions for a query to execute (select, update).
          * 
          * @var     array (default: array())
          * @access  protected
@@ -40,7 +40,7 @@
          * _filters
          * 
          * Filters that should be applied to a result set after it has been
-         * returned by the database
+         * returned by the database.
          * 
          * @var     array (default: array())
          * @access  protected
@@ -50,7 +50,7 @@
         /**
          * _groupings
          * 
-         * Columns/fields whereby a result set should be grouped into/by
+         * Columns/fields whereby a result set should be grouped into/by.
          * 
          * @var     array (default: array())
          * @access  protected
@@ -58,20 +58,17 @@
         protected $_groupings = array();
 
         /**
-         * _inputs
-         * 
-         * Input (columns:values) that should be used in create/update
-         * operations (<insert> and <update> methods)
+         * _insertRecords
          * 
          * @var     array (default: array())
          * @access  protected
          */
-        protected $_inputs = array();
+        protected $_insertRecords = array();
 
         /**
          * _lockType
          * 
-         * Whether the locking call should prevent reading or writing
+         * Whether the locking call should prevent reading or writing.
          * 
          * @var     array (default: null)
          * @access  protected
@@ -81,9 +78,9 @@
         /**
          * _offset
          * 
-         * Where a select query should begin it's search
+         * Where a select query should begin it's search.
          * 
-         * @var     integer (default: 0)
+         * @var     false|integer (default: 0)
          * @access  protected
          */
         protected $_offset = 0;
@@ -92,7 +89,7 @@
          * _orders
          * 
          * Columns and orderings for a result set to be returned/updated
-         * (select, update)
+         * (select, update).
          * 
          * @var     array (default: array())
          * @access  protected
@@ -100,12 +97,20 @@
         protected $_orders = array();
 
         /**
+         * _replaceRecords
+         * 
+         * @var     array (default: array())
+         * @access  protected
+         */
+        protected $_replaceRecords = array();
+
+        /**
          * _rows
          * 
          * Number of rows that should be returned for a statement (select,
-         * update)
+         * update).
          * 
-         * @var     integer (default: 10)
+         * @var     false|integer (default: 10)
          * @access  protected
          */
         protected $_rows = 10;
@@ -114,7 +119,7 @@
          * _tables
          * 
          * List of tables, and optionally their aliases for the query, for usage
-         * in the call
+         * in the call.
          * 
          * @var     array (default: array())
          * @access  protected
@@ -124,12 +129,22 @@
         /**
          * _type
          * 
-         * Type of query that should be run (select, update, ...)
+         * Type of query that should be run (select, update, ...).
          * 
          * @var     string
          * @access  protected
          */
         protected $_type;
+
+        /**
+         * _updateValues
+         * 
+         * Array of column:value pairs that should be used in update operations.
+         * 
+         * @var     array (default: array())
+         * @access  protected
+         */
+        protected $_updateValues = array();
 
         /**
          * __construct
@@ -144,7 +159,7 @@
         /**
          * __toString
          * 
-         * An alias of <parse>
+         * An alias of <parse>.
          * 
          * @access  public
          * @return  void
@@ -158,7 +173,7 @@
          * _conditions
          * 
          * Sets passed in conditions to a specific format, and returns
-         * (recursively) the results. Used by having and where methods
+         * (recursively) the results. Used by having and where methods.
          * 
          * @access  protected
          * @return  array conditions as formatted to the proper internal
@@ -176,40 +191,38 @@
                         if (is_int($sub) === false) {
                             $numeric = false;
                             if (is_array($value) === true) {
+                                $callback = array($this, '_conditions');
                                 $conditions = array_merge(
                                     $conditions,
                                     call_user_func_array(
-                                        array($this, '_conditions'),
+                                        $callback,
                                         array_merge(array($sub), $value)
                                     )
                                 );
                             } else {
+                                $callback = array($this, '_conditions');
                                 $conditions = array_merge(
                                     $conditions,
                                     call_user_func_array(
-                                        array($this, '_conditions'),
+                                        $callback,
                                         array($sub, $value)
                                     )
                                 );
                             }
                         } elseif (is_array($value) === true) {
                             $numeric = false;
+                            $callback = array($this, '_conditions');
                             $conditions = array_merge(
                                 $conditions,
-                                call_user_func_array(
-                                    array($this, '_conditions'),
-                                    $value
-                                )
+                                call_user_func_array($callback, $value)
                             );
                         }
                     }
                     if ($numeric === true) {
+                        $callback = array($this, '_conditions');
                         $conditions = array_merge(
                             $conditions,
-                            call_user_func_array(
-                                array($this, '_conditions'),
-                                $arg
-                            )
+                            call_user_func_array($callback, $arg)
                         );
                     }
                 } else {
@@ -218,10 +231,11 @@
                         if (is_array($args[1]) === true) {
                             $operand = 'IN';
                         }
+                        $callback = array($this, '_conditions');
                         $conditions = array_merge(
                             $conditions,
                             call_user_func_array(
-                                array($this, '_conditions'),
+                                $callback,
                                 array($args[0], $operand, $args[1], true)
                             )
                         );
@@ -235,7 +249,7 @@
                          * doesn't matter which); automatically set the operand
                          * to *IN* since there were only 3-parameters set;
                          * otherwise since 3-parameters, assume operand properly
-                         * set in 2nd position
+                         * set in 2nd position.
                          */
                         if (
                             in_array(true, $args, true) === true
@@ -249,10 +263,11 @@
                             $operand = $args[1];
                             $value = $args[2];
                         }
+                        $callback = array($this, '_conditions');
                         $conditions = array_merge(
                             $conditions,
                             call_user_func_array(
-                                array($this, '_conditions'),
+                                $callback,
                                 array($args[0], $operand, $value, $auto)
                             )
                         );
@@ -283,17 +298,80 @@
         }
 
         /**
-         * _inputs
+         * _insertRecords
          * 
-         * Formats an input (update/insert) call to have it's data stored in a
-         * consistent/organized way for parsing
+         * @access  protected
+         * @return  void
+         */
+        protected function _insertRecords()
+        {
+            $args = func_get_args();
+            foreach ($args as $record) {
+                foreach ($record as $column => $value) {
+                    if (is_array($value) === false) {
+                        $record[$column] = array($value, true);
+                    }
+                }
+                array_push($this->_insertRecords, $record);
+            }
+        }
+
+        /**
+         * _referencesAlias
+         * 
+         * Returns whether or not the passed in string is likely to be
+         * referencing a table alias. The first check returns false if the
+         * string passed in is surrounded by single quotes. After that, the
+         * string is exploded by the period symbol (which is used to denote
+         * table aliases), and then checked whether a table alias is present.
+         * 
+         * @access  protected
+         * @param   string $str
+         * @return  boolean
+         */
+        protected function _referencesAlias(string $str)
+        {
+            if (preg_match('/^\'.+\'$/', $str) === 1) {
+                return false;
+            }
+            $pieces = explode('.', $str);
+            if (count($pieces) > 1) {
+                return true;
+            }
+            return false;
+        }
+
+        /**
+         * _replaceRecords
+         * 
+         * @access  protected
+         * @return  void
+         */
+        protected function _replaceRecords()
+        {
+            $args = func_get_args();
+            foreach ($args as $record) {
+                foreach ($record as $column => $value) {
+                    if (is_array($value) === false) {
+                        $value = array($value, true);
+                    }
+                }
+                array_push($this->_replaceRecords, $record);
+            }
+        }
+
+        /**
+         * _updateValues
+         * 
+         * Formats an update call to have it's data stored in a
+         * consistent/organized way for parsing.
          * 
          * @note    third optional parameter in a call is whether or not to
          *          auto-add apostrophes
          * @access  protected
          * @return  void
          */
-        protected function _inputs()
+        protected function _updateValues()
         {
             $args = func_get_args();
             foreach ($args as $arg) {
@@ -304,19 +382,24 @@
                             if (is_array($value) === true) {
                                 $params = $value;
                                 array_unshift($params, $sub);
-                                call_user_func_array(array($this, '_inputs'), $params);
+                                $callback = array($this, '_updateValues');
+                                call_user_func_array($callback, $params);
                             } else {
-                                $this->_inputs($sub, $value);
+                                $this->_updateValues($sub, $value);
                             }
                         }
                     } else {
-                        call_user_func_array(array($this, '_inputs'), $arg);
+                        $callback = array($this, '_updateValues');
+                        call_user_func_array($callback, $arg);
                     }
                 } elseif (is_string($arg) === true) {
                     if (count($args) === 2) {
-                        $this->_inputs[$args[0]] = array($args[1], true);
+                        $this->_updateValues[$args[0]] = array($args[1], true);
                     } elseif (count($args) === 3) {
-                        $this->_inputs[$args[0]] = array($args[1], $args[2]);
+                        $this->_updateValues[$args[0]] = array(
+                            $args[1],
+                            $args[2]
+                        );
                     }
                     break;
                 }
@@ -324,9 +407,40 @@
         }
 
         /**
+         * _wrapWithTildes
+         * 
+         * Wraps a string or array of strings in tildes to ensure proper query
+         * escaping.
+         * 
+         * @access  protected
+         * @param   array|string $value
+         * @return  array|string
+         */
+        protected function _wrapWithTildes($value)
+        {
+            if (is_array($value) === true) {
+                $strs = $value;
+                foreach ($strs as $index => $str) {
+                    $strs[$index] = $this->_wrapWithTildes($str);
+                }
+                return $strs;
+            } else {
+                if ($value === 'COUNT(1)') {
+                    return $value;
+                }
+                $pieces = array();
+                $exploded = explode('.', $value);
+                foreach ($exploded as $piece) {
+                    array_push($pieces, '`' . ($piece) . '`');
+                }
+                return implode('.', $pieces);
+            }
+        }
+
+        /**
          * andWhere
          * 
-         * An alias of <where>
+         * An alias of <where>.
          * 
          * @access  public
          * @return  void
@@ -334,22 +448,24 @@
         public function andWhere()
         {
             $args = func_get_args();
-            call_user_func_array(array($this, 'where'), $args);
+            $callback = array($this, 'where');
+            call_user_func_array($callback, $args);
         }
 
         /**
          * average
          * 
          * An alias of Query::select(array('average' => 'AVG(column)')). Sets
-         * the average of a column for the query to be selected
+         * the average of a column for the query to be selected.
          * 
          * @access  public
-         * @param   string $column column that should have it's average calculated
-         * @param   string $name. (default: 'average') the name/alias/key for the
+         * @param   string $column column that should have it's average
+         *          calculated
+         * @param   string $name (default: 'average') the name/alias/key for the
          *          average
          * @return  void
          */
-        public function average($column, $name = 'average')
+        public function average(string $column, string $name = 'average')
         {
             $this->select(array($name => 'AVG(' . ($column) . ')'));
         }
@@ -358,18 +474,18 @@
          * count
          * 
          * An alias of Query::select(array('count' => 'COUNT(status)')). Sets
-         * the number of columns for the query to be selected
+         * the number of columns for the query to be selected.
          * 
          * @note    $coloumn could be something like `DISTINCT user_id` for more
          *          accurate/flexible counting
          * @access  public
-         * @param   string $column. (default: '1') the column that should be used
+         * @param   string $column (default: '1') the column that should be used
          *          for counting
-         * @param   string $name. (default: 'count') the name/alias/key for the
+         * @param   string $name (default: 'count') the name/alias/key for the
          *          count
          * @return  void
          */
-        public function count($column = '1', $name = 'count')
+        public function count(string $column = '1', string $name = 'count')
         {
             $this->select(array($name => 'COUNT(' . ($column) . ')'));
         }
@@ -384,13 +500,14 @@
         {
             $this->_type = 'delete';
             $args = func_get_args();
-            call_user_func_array(array($this, 'table'), $args);
+            $callback = array($this, 'table');
+            call_user_func_array($callback, $args);
         }
 
         /**
          * filter
          * 
-         * An alias of <having>
+         * An alias of <having>.
          * 
          * @access  public
          * @return  void
@@ -398,13 +515,14 @@
         public function filter()
         {
             $args = func_get_args();
-            call_user_func_array(array($this, 'having'), $args);
+            $callback = array($this, 'having');
+            call_user_func_array($callback, $args);
         }
 
         /**
          * from
          * 
-         * An alias of <table>
+         * An alias of <table>.
          * 
          * @access  public
          * @return  void
@@ -412,14 +530,15 @@
         public function from()
         {
             $args = func_get_args();
-            call_user_func_array(array($this, 'table'), $args);
+            $callback = array($this, 'table');
+            call_user_func_array($callback, $args);
         }
 
         /**
          * groupBy
          * 
          * Specifies what columns/fields an SQL result set should be grouped
-         * into
+         * into.
          * 
          * @access  public
          * @return  void
@@ -433,7 +552,7 @@
         /**
          * having
          * 
-         * Sets the filters/having conditions for a select statement
+         * Sets the filters/having conditions for a select statement.
          * 
          * @access  public
          * @return  void
@@ -441,15 +560,17 @@
         public function having()
         {
             $args = func_get_args();
-            $this->_filters[][] = call_user_func_array(array($this, '_conditions'), $args);
+            $callback = array($this, '_conditions');
+            $this->_filters[][] = call_user_func_array($callback, $args);
         }
 
         /**
          * insert
          * 
-         * Stores a column/value to be inserted, by calling _inputs internally.
-         * If no arguments passed, calls itself with default columns/values
+         * Stores a column/value to be inserted, by calling _insertRecords 
+         * internally.
          * 
+         * @throws  Exception
          * @access  public
          * @return  void
          */
@@ -461,20 +582,20 @@
             // argument retrieval for validation and storage
             $args = func_get_args();
             if (empty($args) === true) {
-                throw new Exception(
-                    'Column must be specified for <insert> method.'
-                );
+                $msg = 'Column must be specified for <insert> method.';
+                throw new Exception($msg);
             }
 
             // internal input routing
             $args = func_get_args();
-            call_user_func_array(array($this, '_inputs'), $args);
+            $callback = array($this, '_insertRecords');
+            call_user_func_array($callback, $args);
         }
 
         /**
          * into
          * 
-         * An alias of <table>
+         * An alias of <table>.
          * 
          * @access  public
          * @return  void
@@ -482,13 +603,14 @@
         public function into()
         {
             $args = func_get_args();
-            call_user_func_array(array($this, 'table'), $args);
+            $callback = array($this, 'table');
+            call_user_func_array($callback, $args);
         }
 
         /**
          * limit
          * 
-         * An alias of <rows>
+         * An alias of <rows>.
          * 
          * @access  public
          * @return  void
@@ -496,7 +618,8 @@
         public function limit()
         {
             $args = func_get_args();
-            call_user_func_array(array($this, 'rows'), $args);
+            $callback = array($this, 'rows');
+            call_user_func_array($callback, $args);
         }
 
         /**
@@ -504,10 +627,10 @@
          * 
          * @access  public
          * @param   array $tables
-         * @param   type $lockType
+         * @param   string $lockType
          * @return  void
          */
-        public function lock(array $tables, $lockType)
+        public function lock(array $tables, string $lockType)
         {
             foreach ($tables as $key => $table) {
                 $tables[$key] = ($table) . ' ' . strtoupper($lockType);
@@ -521,11 +644,11 @@
         /**
          * offset
          * 
-         * What row to begin the retrieval from
+         * What row to begin the retrieval from.
          * 
          * @access  public
-         * @param   integer $offset. (default: 0) what row to begin retrieval
-         *          from (aka the result-set's offset)
+         * @param   integer|boolean $offset (default: 0) what row to begin
+         *          retrieval from (aka the result-set's offset)
          * @return  void
          */
         public function offset($offset = 0)
@@ -538,6 +661,7 @@
          * 
          * Sets the order expressions for an SQL select or update statement.
          * 
+         * @throws  Exception
          * @access  public
          * @return  void
          */
@@ -562,7 +686,8 @@
                         if (is_object($arg) === true) {
                             $arg = array($arg);
                         }
-                        call_user_func_array(array($this, 'orderBy'), $arg);
+                        $callback = array($this, 'orderBy');
+                        call_user_func_array($callback, $arg);
                     }
                 } else {
                     $this->_orders[] = array($args[0], array(), true);
@@ -573,10 +698,9 @@
                 } elseif (is_array($args[1]) === true) {
                     $this->_orders[] = array($args[0], $args[1], true);
                 } else {
-                    throw new Exception(
-                        'Unexpected second parameter type; should be ' .
-                        '*boolean* or *array* (or not passed).'
-                    );
+                    $msg = 'Unexpected second parameter type; should be ' .
+                        '*boolean* or *array* (or not passed).';
+                    throw new Exception($msg);
                 }
             } elseif (count($args) === 3) {
                 $this->_orders[] = $args;
@@ -586,7 +710,7 @@
         /**
          * orFilter
          * 
-         * An alias of <orHaving>
+         * An alias of <orHaving>.
          * 
          * @access  public
          * @return  void
@@ -594,25 +718,29 @@
         public function orFilter()
         {
             $args = func_get_args();
-            call_user_func_array(array($this, 'orHaving'), $args);
+            $callback = array($this, 'orHaving');
+            call_user_func_array($callback, $args);
         }
 
         /**
          * orHaving
          * 
          * Makes the previous having condition non-binding with a logical
-         * OR/or/|| condition
+         * OR/or/|| condition.
          * 
+         * @throws  Exception
          * @access  public
          * @return  void
          */
         public function orHaving()
         {
             if (empty($this->_conditions) === true) {
-                throw new Exception('<orHaving> call requires <having> call first.');
+                $msg = '<orHaving> call requires <having> call first.';
+                throw new Exception($msg);
             }
             $args = func_get_args();
-            call_user_func_array(array($this, 'having'), $args);
+            $callback = array($this, 'having');
+            call_user_func_array($callback, $args);
             $condition = array_pop($this->_conditions);
             $condition = $condition[0];
             $last = &$this->_conditions[count($this->_conditions) - 1];
@@ -623,20 +751,21 @@
          * orWhere
          * 
          * Makes the previous where call/conditions non-binding with a logical
-         * OR/or/|| condition
+         * OR/or/|| condition.
          * 
+         * @throws  Exception
          * @access  public
          * @return  void
          */
         public function orWhere()
         {
             if (empty($this->_conditions) === true) {
-                throw new Exception(
-                    '<orWhere> call requires <where> call first.'
-                );
+                $msg = '<orWhere> call requires <where> call first.';
+                throw new Exception($msg);
             }
             $args = func_get_args();
-            call_user_func_array(array($this, 'where'), $args);
+            $callback = array($this, 'where');
+            call_user_func_array($callback, $args);
             $condition = array_pop($this->_conditions);
             $condition = $condition[0];
             $last = &$this->_conditions[count($this->_conditions) - 1];
@@ -647,8 +776,9 @@
          * parse
          * 
          * Creates a valid SQL statement based on the properties set by this
-         * instance of the Query class
+         * instance of the Query class.
          * 
+         * @throws  Exception
          * @access  public
          * @return  string valid, minified, SQL statement ready to be
          *          executed/run
@@ -658,16 +788,16 @@
             // no table found
             if (empty($this->_tables) === true) {
                 if ($this->_type !== 'unlock') {
-                    throw new Exception('Table must be specified for query');
+                    $msg = 'Table must be specified for query';
+                    throw new Exception($msg);
                 }
             }
 
             // command
             if (is_null($this->_type) === true) {
-                throw new Exception(
-                    'Query::$type must be specified by calling <select>,' .
-                    '<set>, <delete> or <insert>.'
-                );
+                $msg = 'Query::$type must be specified by calling <select>,' .
+                    '<set>, <delete> or <insert>.';
+                throw new Exception($msg);
             }
             $command = strtoupper($this->_type);
             if ($this->_type === 'insert' || $this->_type === 'replace') {
@@ -678,7 +808,15 @@
             if ($this->_type === 'select') {
                 $columns = array();
                 foreach ($this->_columns as $key => $column) {
-                    $exp = $column;
+                    $column = preg_replace('/ as /i', ' AS ', $column);
+                    if (strstr($column, ' AS ') !== false) {
+                        list($column, $alias) = explode(' AS ', $column);
+                        $column = $this->_wrapWithTildes($column) . ' AS ' .
+                            ($alias);
+                        $exp = $column;
+                    } else {
+                        $exp = $this->_wrapWithTildes($column);
+                    }
                     if (is_object($column) === true) {
                         $exp = '(' . ($column->parse()) . ')';
                     }
@@ -693,14 +831,14 @@
             // inputs
             if ($this->_type === 'update') {
                 $inputs = array();
-                foreach ($this->_inputs as $column => $details) {
-                    $exp = ($column) . ' = ';
+                foreach ($this->_updateValues as $column => $details) {
+                    $exp = $this->_wrapWithTildes($column) . ' = ';
                     if (is_object($details[0]) === true) {
                         $exp .= '(' . ($details[0]->parse()) . ')';
                     } elseif ($details[1] === true) {
                         if (
                             is_int($details[0]) === true
-                            || in_array($details[0], array('NOW()'))
+                            || in_array($details[0], array('NOW()')) === true
                         ) {
                             $exp .= $details[0];
                         } else {
@@ -715,23 +853,33 @@
             } elseif ($this->_type === 'insert' || $this->_type === 'replace') {
                 $columns = array();
                 $values = array();
-                foreach ($this->_inputs as $column => $details) {
-                    $columns[] = $column;
-                    if (is_object($details[0]) === true) {
-                        $value = '(' . ($details[0]->parse()) . ')';
-                    } elseif ($details[1] === true) {
-                        if (
-                            is_int($details[0]) === true
-                            || in_array($details[0], array('NOW()')) === true
-                        ) {
-                            $value = $details[0];
-                        } else {
-                            $value = '\'' . ($details[0]) . '\'';
-                        }
-                    } else {
-                        $value = $details[0];
+                $records = $this->_insertRecords;
+                if ($this->_type === 'replace') {
+                    $records = $this->_replaceRecords;
+                }
+                foreach ($records as $record) {
+                    if (empty($columns) === true) {
+                        $columns = array_keys($record);
                     }
-                    $values[] = $value;
+                    $recordValues = array();
+                    foreach ($record as $column => $value) {
+                        if (is_object($value[0]) === true) {
+                            $value = '(' . ($value[0]->parse()) . ')';
+                        } elseif ($value[1] === true) {
+                            if (
+                                is_int($value[0]) === false
+                                && in_array($value[0], array('NOW()')) === false
+                            ) {
+                                $value = '\'' . ($value[0]) . '\'';
+                            } else {
+                                $value = $value[0];
+                            }
+                        } else {
+                            $value = $value[0];
+                        }
+                        array_push($recordValues, $value);
+                    }
+                    array_push($values, $recordValues);
                 }
             }
 
@@ -739,9 +887,17 @@
             $tables = array();
             foreach ($this->_tables as $alias => $table) {
                 if (is_int($alias) === true) {
-                    $tables[] = $table;
+                    $table = preg_replace('/ as /i', ' AS ', $table);
+                    if (strstr($table, ' AS ') !== false) {
+                        list($table, $alias) = explode(' AS ', $table);
+                        $tables[] = $this->_wrapWithTildes($table) . ' AS ' .
+                            ($alias);
+                    } else {
+                        $tables[] = $this->_wrapWithTildes($table);
+                    }
                 } else {
-                    $tables[] = ($table) . ' AS ' . ($alias);
+                    $tables[] = $this->_wrapWithTildes($table) . ' AS ' .
+                        ($alias);
                 }
             }
             $tables = implode(', ', $tables);
@@ -782,7 +938,14 @@
                                         $value = '\'' . ($value) . '\'';
                                     }
                                 }
-                                $and[] = ($column) . ' ' . ($details[0]) . ' ' . ($value);
+                                $condition = $this->_wrapWithTildes($column) .
+                                    ' ' . ($details[0]) . ' ';
+                                if ($this->_referencesAlias($value) === true) {
+                                    $condition .= $this->_wrapWithTildes($value);
+                                } else {
+                                    $condition .= $value;
+                                }
+                                $and[] = $condition;
                             }
                             if (count($and) === 1) {
                                 $or[] = implode(' AND ', $and);
@@ -839,7 +1002,15 @@
                                         $value = '\'' . ($value) . '\'';
                                     }
                                 }
-                                $and[] = ($column) . ' ' . ($details[0]) . ' ' . ($value);
+
+                                $condition = $this->_wrapWithTildes($column) .
+                                    ' ' . ($details[0]) . ' ';
+                                if ($this->_referencesAlias($value) === true) {
+                                    $condition .= $this->_wrapWithTildes($value);
+                                } else {
+                                    $condition .= $value;
+                                }
+                                $and[] = $condition;
                             }
                             if (count($and) === 1) {
                                 $or[] = implode(' AND ', $and);
@@ -871,7 +1042,7 @@
                         if (is_object($column) === true) {
                             $column = '(' . ($column->parse()) . ')';
                         }
-                        $exp = $column;
+                        $exp = $this->_wrapWithTildes($column);
                         if (empty($rule[1]) === false) {
                             $exp = 'field(' . ($exp) . ', \'' . implode('\', \'', $rule[1]) . '\')';
                         }
@@ -915,10 +1086,10 @@
                 if (empty($orders) === false) {
                     $statement .= ' ORDER BY ' . ($orders);
                 }
-                if (empty($rows) === false) {
+                if ($rows !== false) {
                     $statement .= ' LIMIT ' . ($rows);
                 }
-                if (empty($offset) === false || $offset === 0) {
+                if ($offset !== false) {
                     $statement .= ' OFFSET ' . ($offset);
                 }
             } elseif ($this->_type === 'delete') {
@@ -934,8 +1105,13 @@
                 }
             } elseif ($this->_type === 'insert' || $this->_type === 'replace') {
                 $statement .= ' ' . ($tables);
+                $columns = $this->_wrapWithTildes($columns);
                 $statement .= ' (' . implode(', ', $columns) . ')';
-                $statement .= ' VALUES (' . implode(', ', $values) . ')';
+                $statement .= ' VALUES ';
+                foreach ($values as $index => $value) {
+                    $values[$index] = '(' . implode(', ', $value) . ')';
+                }
+                $statement .= implode(', ', $values);
             } elseif ($this->_type === 'update') {
                 $statement .= ' ' . ($tables) . ' SET ' . ($inputs);
                 if (empty($conditions) === false) {
@@ -982,7 +1158,7 @@
         /**
          * select
          * 
-         * Sets the columns to return in a select statement
+         * Sets the columns to return in a select statement.
          * 
          * @access  public
          * @return  void
@@ -995,11 +1171,13 @@
                 $this->select('*');
             } else {
 
-                // loop through arguments, formatting the primary key selection or adding the columns
+                // loop through arguments, formatting the primary key selection
+                // or adding the columns
                 foreach ($args as $arg) {
 
                     // can't be if/elseif, need's to be consecutive
                     if (is_array($arg) === false) {
+                        // $this->_columns[] = $this->_wrapWithTildes($arg);
                         $this->_columns[] = $arg;
                     }
                     if (is_array($arg) === true) {
@@ -1018,6 +1196,7 @@
         /**
          * replace
          * 
+         * @throws  Exception
          * @access  public
          * @return  void
          */
@@ -1029,22 +1208,24 @@
             // argument retrieval for validation and storage
             $args = func_get_args();
             if (empty($args) === true) {
-                throw new Exception(
-                    'Column must be specified for <replace> method.'
-                );
+                $msg = 'Column must be specified for <replace> method.';
+                throw new Exception($msg);
             }
 
             // internal input routing
             $args = func_get_args();
-            call_user_func_array(array($this, '_inputs'), $args);
+            $callback = array($this, '_replaceRecords');
+            call_user_func_array($callback, $args);
         }
 
         /**
          * set
          * 
-         * Stores a column/value to be updated, by calling _inputs interally. If
-         * no arguments passed, calls itself with default columns/values
+         * Stores a column/value to be updated, by calling _updateValues
+         * interally. If no arguments passed, calls itself with default
+         * columns/values.
          * 
+         * @throws  Exception
          * @access  public
          * @return  void
          */
@@ -1056,35 +1237,35 @@
             /**
              * By default; remove limit on update query; note that this is set
              * here, rather than in the <parse> method, to allow for it to be
-             * overridden
+             * overridden.
              */
             $this->limit(false);
 
             // argument retrieval for validation and storage
             $args = func_get_args();
             if (empty($args) === true) {
-                throw new Exception(
-                    'Column must be specified for <set> method.'
-                );
+                $msg = 'Column must be specified for <set> method.';
+                throw new Exception($msg);
             }
 
             // internal input routing
             $args = func_get_args();
-            call_user_func_array(array($this, '_inputs'), $args);
+            $callback = array($this, '_updateValues');
+            call_user_func_array($callback, $args);
         }
 
         /**
          * sum
          * 
          * An alias of Query::select(array('sum' => 'SUM(column)')). Sets the
-         * sum of a column for the query to be selected
+         * sum of a column for the query to be selected.
          * 
          * @access  public
          * @param   string $column column that should have it's sum calculated
-         * @param   string $name. (default: 'sum') the name/alias/key for the sum
+         * @param   string $name (default: 'sum') the name/alias/key for the sum
          * @return  void
          */
-        public function sum($column, $name = 'sum')
+        public function sum(string $column, string $name = 'sum')
         {
             $this->select(array($name => 'SUM(' . ($column) . ')'));
         }
@@ -1093,7 +1274,7 @@
          * table
          * 
          * Records the tables that should be used for the statement, with their
-         * alias/key specified
+         * alias/key specified.
          * 
          * @access  public
          * @return  void
@@ -1130,7 +1311,7 @@
         /**
          * update
          * 
-         * An alias of <table>
+         * An alias of <table>.
          * 
          * @access  public
          * @return  void
@@ -1138,13 +1319,14 @@
         public function update()
         {
             $args = func_get_args();
-            call_user_func_array(array($this, 'table'), $args);
+            $callback = array($this, 'table');
+            call_user_func_array($callback, $args);
         }
 
         /**
          * where
          * 
-         * Sets the conditionals for a select or set statement
+         * Sets the conditionals for a select or set statement.
          * 
          * @access  public
          * @return  void
@@ -1152,9 +1334,7 @@
         public function where()
         {
             $args = func_get_args();
-            $this->_conditions[][] = call_user_func_array(
-                array($this, '_conditions'),
-                $args
-            );
+            $callback = array($this, '_conditions');
+            $this->_conditions[][] = call_user_func_array($callback, $args);
         }
     }
