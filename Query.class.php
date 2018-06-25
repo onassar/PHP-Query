@@ -434,6 +434,9 @@
             if ($value === 'COUNT(1)') {
                 return $value;
             }
+            if ($value === 'MATCH') {
+                return $value;
+            }
             if(strstr($value, ' ') !== false) {
                 return $value;
             }
