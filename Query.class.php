@@ -412,6 +412,9 @@
          * Wraps a string or array of strings in tildes to ensure proper query
          * escaping.
          * 
+         * @note    The empty space check below is done to ensure more
+         *          complicated "column" names don't get messed up (eg.
+         *          "(t.tag) AGAINST ('love' IN NATURAL LANGUAGE MODE)").
          * @access  protected
          * @param   array|string $value
          * @return  array|string
@@ -424,20 +427,22 @@
                     $strs[$index] = $this->_wrapWithTildes($str);
                 }
                 return $strs;
-            } else {
-                if ($value === '*') {
-                    return $value;
-                }
-                if ($value === 'COUNT(1)') {
-                    return $value;
-                }
-                $pieces = array();
-                $exploded = explode('.', $value);
-                foreach ($exploded as $piece) {
-                    array_push($pieces, '`' . ($piece) . '`');
-                }
-                return implode('.', $pieces);
             }
+            if ($value === '*') {
+                return $value;
+            }
+            if ($value === 'COUNT(1)') {
+                return $value;
+            }
+            if(strstr($value, ' ') !== false) {
+                return $value;
+            }
+            $pieces = array();
+            $exploded = explode('.', $value);
+            foreach ($exploded as $piece) {
+                array_push($pieces, '`' . ($piece) . '`');
+            }
+            return implode('.', $pieces);
         }
 
         /**
