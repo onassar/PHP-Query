@@ -21,8 +21,8 @@
          * 
          * Columns/fields that should be selected from the database.
          * 
-         * @var     array (default: array())
          * @access  protected
+         * @var     array (default: array())
          */
         protected $_columns = array();
 
@@ -31,8 +31,8 @@
          * 
          * Conditions for a query to execute (select, update).
          * 
-         * @var     array (default: array())
          * @access  protected
+         * @var     array (default: array())
          */
         protected $_conditions = array();
 
@@ -42,8 +42,8 @@
          * Filters that should be applied to a result set after it has been
          * returned by the database.
          * 
-         * @var     array (default: array())
          * @access  protected
+         * @var     array (default: array())
          */
         protected $_filters = array();
 
@@ -52,16 +52,16 @@
          * 
          * Columns/fields whereby a result set should be grouped into/by.
          * 
-         * @var     array (default: array())
          * @access  protected
+         * @var     array (default: array())
          */
         protected $_groupings = array();
 
         /**
          * _insertRecords
          * 
-         * @var     array (default: array())
          * @access  protected
+         * @var     array (default: array())
          */
         protected $_insertRecords = array();
 
@@ -70,8 +70,8 @@
          * 
          * Whether the locking call should prevent reading or writing.
          * 
-         * @var     array (default: null)
          * @access  protected
+         * @var     array (default: null)
          */
         protected $_lockType = null;
 
@@ -80,8 +80,8 @@
          * 
          * Where a select query should begin it's search.
          * 
-         * @var     false|integer (default: 0)
          * @access  protected
+         * @var     false|int (default: 0)
          */
         protected $_offset = 0;
 
@@ -91,16 +91,16 @@
          * Columns and orderings for a result set to be returned/updated
          * (select, update).
          * 
-         * @var     array (default: array())
          * @access  protected
+         * @var     array (default: array())
          */
         protected $_orders = array();
 
         /**
          * _replaceRecords
          * 
-         * @var     array (default: array())
          * @access  protected
+         * @var     array (default: array())
          */
         protected $_replaceRecords = array();
 
@@ -110,8 +110,8 @@
          * Number of rows that should be returned for a statement (select,
          * update).
          * 
-         * @var     false|integer (default: 10)
          * @access  protected
+         * @var     false|int (default: 10)
          */
         protected $_rows = 10;
 
@@ -121,8 +121,8 @@
          * List of tables, and optionally their aliases for the query, for usage
          * in the call.
          * 
-         * @var     array (default: array())
          * @access  protected
+         * @var     array (default: array())
          */
         protected $_tables = array();
 
@@ -131,8 +131,8 @@
          * 
          * Type of query that should be run (select, update, ...).
          * 
-         * @var     string
          * @access  protected
+         * @var     string
          */
         protected $_type;
 
@@ -141,8 +141,8 @@
          * 
          * Array of column:value pairs that should be used in update operations.
          * 
-         * @var     array (default: array())
          * @access  protected
+         * @var     array (default: array())
          */
         protected $_updateValues = array();
 
@@ -327,7 +327,7 @@
          * 
          * @access  protected
          * @param   string $str
-         * @return  boolean
+         * @return  bool
          */
         protected function _referencesAlias(string $str)
         {
@@ -661,8 +661,8 @@
          * What row to begin the retrieval from.
          * 
          * @access  public
-         * @param   integer|boolean $offset (default: 0) what row to begin
-         *          retrieval from (aka the result-set's offset)
+         * @param   int|bool $offset (default: 0) what row to begin retrieval
+         *          from (aka the result-set's offset)
          * @return  void
          */
         public function offset($offset = 0)
@@ -1157,8 +1157,7 @@
          * limit.
          * 
          * @access  public
-         * @param   false|integer $rows number of rows to limit the result set
-         *          by
+         * @param   false|int $rows number of rows to limit the result set by
          * @return  void
          */
         public function rows($rows = 10)
