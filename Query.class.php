@@ -446,6 +446,14 @@
             if ($value === 'MATCH') {
                 return $value;
             }
+            preg_match('/^DISTINCT\(/', $value, $matches);
+            if (count($matches) > 0) {
+                return $value;
+            }
+            preg_match('/^COUNT\(DISTINCT\(/', $value, $matches);
+            if (count($matches) > 0) {
+                return $value;
+            }
             if(strstr($value, ' ') !== false) {
                 return $value;
             }
@@ -1188,6 +1196,8 @@
             $args = func_get_args();
             if (empty($args) === true) {
                 $this->select('*');
+            } elseif ($args[0] === false) {
+                $this->_columns = [];
             } else {
 
                 // loop through arguments, formatting the primary key selection
