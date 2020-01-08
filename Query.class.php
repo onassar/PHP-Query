@@ -428,6 +428,12 @@
                 }
                 return $strs;
             }
+            $haystack = $value;
+            $needle = '`';
+            $found = strpos($haystack, $needle) !== false;
+            if ($found === true) {
+                return $value;
+            }
             if ($value === '*') {
                 return $value;
             }
