@@ -13,32 +13,29 @@ and maintain.
 ### API Samples
 
 ``` php
-<?php
+// select a username's details
+$query = new Query();
+$query->select('*');
+$query->from('users');
+$query->where('username', 'onassar');
+$parsed = $query->parse();
 
-    // select a username's details
-    $query = new Query();
-    $query->select('*');
-    $query->from('users');
-    $query->where('username', 'onassar');
-    $parsed = $query->parse();
+// update a user record
+$query = new Query();
+$query->update('users');
+$query->set('fname', 'Oliver');
+$query->where('username', 'onassar');
+$parsed = $query->parse();
 
-    // update a user record
-    $query = new Query();
-    $query->update('users');
-    $query->set('fname', 'Oliver');
-    $query->where('username', 'onassar');
-    $parsed = $query->parse();
-
-    // insert a user record
-    $query = new Query();
-    $query->insert(array(
-        'fname' => 'Oliver',
-        'lname' => 'Nassar',
-        'username' => 'onassar'
-    ));
-    $query->into('users');
-    $parsed = $query->parse();
-
+// insert a user record
+$query = new Query();
+$query->insert(array(
+    'fname' => 'Oliver',
+    'lname' => 'Nassar',
+    'username' => 'onassar'
+));
+$query->into('users');
+$parsed = $query->parse();
 ```
 
 ### Performance
