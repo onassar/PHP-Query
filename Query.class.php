@@ -1,7 +1,10 @@
 <?php
 
+    // Namespace overhead
+    namespace onassar\Query;
+
     /**
-     * Query
+     * Base
      * 
      * ActiveRecord inspired PHP ORM, which focuses on being decoupled from
      * other libraries. Queries are *not* processed by this ORM, but rather
@@ -14,7 +17,7 @@
      * @link    https://github.com/onassar/PHP-Query
      * @author  Oliver Nassar <onassar@gmail.com>
      */
-    class Query
+    class Base
     {
         /**
          * _columns
