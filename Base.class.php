@@ -20,6 +20,14 @@
     class Base
     {
         /**
+         * _collation
+         * 
+         * @access  protected
+         * @var     null|string (default: null)
+         */
+        protected $_collation = null;
+
+        /**
          * _columns
          * 
          * Columns/fields that should be selected from the database.
@@ -499,6 +507,18 @@
         public function average(string $column, string $name = 'average')
         {
             $this->select(array($name => 'AVG(' . ($column) . ')'));
+        }
+
+        /**
+         * collate
+         * 
+         * @access  public
+         * @param   null|string $collation
+         * @return  void
+         */
+        public function collate(?string $collation)
+        {
+            $this->_collation = $collation;
         }
 
         /**
@@ -1108,6 +1128,9 @@
                 if (empty($conditions) === false) {
                     $statement .= ' WHERE ' . ($conditions);
                 }
+                if ($this->_collation !== null) {
+                    $statement .= ' COLLATE ' . ($this->_collation);
+                }
                 if (empty($groupings) === false) {
                     $statement .= ' GROUP BY ' . ($groupings);
                 }
@@ -1161,6 +1184,8 @@
             } elseif ($this->_type === 'unlock') {
                 $statement .= ' TABLES';
             }
+
+            // Done
             return $statement;
         }
 
