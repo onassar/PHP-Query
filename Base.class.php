@@ -461,6 +461,10 @@
             if (count($matches) > 0) {
                 return $value;
             }
+            preg_match('/^SUM\(/', $value, $matches);
+            if (count($matches) > 0) {
+                return $value;
+            }
             preg_match('/^COUNT\(DISTINCT\(/', $value, $matches);
             if (count($matches) > 0) {
                 return $value;
