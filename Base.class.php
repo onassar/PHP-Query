@@ -457,6 +457,10 @@
             if ($value === 'MATCH') {
                 return $value;
             }
+            preg_match('/^CHAR_LENGTH\(/', $value, $matches);
+            if (count($matches) > 0) {
+                return $value;
+            }
             preg_match('/^MAX\(/', $value, $matches);
             if (count($matches) > 0) {
                 return $value;
