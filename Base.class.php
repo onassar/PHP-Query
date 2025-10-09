@@ -954,7 +954,7 @@
                     if (strstr($table, ' AS ') !== false) {
                         list($table, $alias) = explode(' AS ', $table);
                         $tables[] = $this->_wrapWithTildes($table) . ' AS ' .
-                            ($alias);
+                            $this->_wrapWithTildes($alias);
                     } else {
                         $tables[] = $this->_wrapWithTildes($table);
                     }
